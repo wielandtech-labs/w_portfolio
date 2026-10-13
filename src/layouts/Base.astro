@@ -1,0 +1,119 @@
+---
+import '../styles/global.css';
+// Same files the @fontsource CSS references, so the preload hits the cache.
+import interLatin from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
+import monoLatin from '@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2?url';
+
+interface Props {
+  title?: string;
+  description: string;
+  /** Absolute or root-relative path to a 1200x630 PNG. */
+  ogImage?: string;
+  ogType?: 'website' | 'article';
+}
+
+const { title, description, ogImage = '/og/default.png', ogType = 'website' } = Astro.props;
+const fullTitle = title ? `${title} | WielandTech` : 'WielandTech: production systems, end to end';
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogUrl = new URL(ogImage, Astro.site);
+const path = Astro.url.pathname;
+
+const nav = [
+  { href: '/work/', label: 'Work' },
+  { href: '/services/', label: 'Services' },
+  { href: '/contact/', label: 'Contact' },
+];
+const year = new Date().getFullYear();
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="preload" href={interLatin} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={monoLatin} as="font" type="font/woff2" crossorigin />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0b0f14" media="(prefers-color-scheme: dark)" />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:site_name" content="WielandTech" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script is:inline src="/theme.js"></script>
+  </head>
+  <body class="flex min-h-dvh flex-col antialiased">
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-md focus:bg-accent focus:px-4 focus:py-2 focus:text-accent-fg"
+      >Skip to content</a
+    >
+    <header class="border-b border-border">
+      <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-4 sm:px-6">
+        <a href="/" class="text-lg font-bold tracking-tight" aria-label="WielandTech home">
+          Wieland<span class="text-accent">Tech</span>
+        </a>
+        <nav aria-label="Main">
+          <ul class="flex items-center gap-1 text-sm sm:gap-2">
+            {
+              nav.map((item) => {
+                const active = path.startsWith(item.href);
+                return (
+                  <li>
+                    <a
+                      href={item.href}
+                      aria-current={active ? 'page' : undefined}
+                      class:list={[
+                        'inline-flex min-h-11 items-center rounded-md px-2.5 hover:bg-surface-2 sm:px-3',
+                        active ? 'font-semibold text-fg' : 'text-muted hover:text-fg',
+                      ]}
+                    >
+                      {item.label}
+                    </a>
+                  </li>
+                );
+              })
+            }
+            <li>
+              <button
+                id="theme-toggle"
+                type="button"
+                class="invisible inline-flex size-11 items-center justify-center rounded-md text-muted hover:bg-surface-2 hover:text-fg"
+                aria-label="Toggle theme"
+                aria-pressed="false"
+              >
+                <svg viewBox="0 0 24 24" class="size-5" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" stroke-linejoin="round"></path>
+                </svg>
+              </button>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main" class="flex-1">
+      <slot />
+    </main>
+
+    <footer class="mt-24 border-t border-border">
+      <div class="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-10 text-sm text-muted sm:flex-row sm:items-center sm:justify-between sm:px-6">
+        <p>&copy; {year} VLAN Technology Services, LLC.</p>
+        <ul class="flex flex-wrap gap-x-5 gap-y-2">
+          <li><a class="hover:text-fg" href="https://raphaelwieland.com/">About me &rarr;</a></li>
+          <li><a class="hover:text-fg" href="mailto:raphael@wielandtech.com">raphael@wielandtech.com</a></li>
+        </ul>
+      </div>
+    </footer>
+  </body>
+</html>

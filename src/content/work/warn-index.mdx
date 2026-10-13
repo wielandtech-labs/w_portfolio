@@ -1,0 +1,79 @@
+---
+title: WARN Index
+slug: warn-index
+tagline: US layoff notices from 47 states and DC in one searchable place. Scraped daily, enriched by an LLM, mapped and charted.
+year: '2026'
+status: live
+role: 'Sole developer: design, build, ops'
+stack: [Python, Playwright, PostgreSQL, Claude API, FastAPI, React, Kubernetes]
+links:
+  live: https://warnindex.com
+cover: ../../assets/covers/warn-index.svg
+coverAlt: Bar chart of weekly layoff notices with one highlighted spike.
+featured: true
+order: 1
+---
+
+import Flow from '../../components/Flow.astro';
+
+## Problem
+
+The WARN Act makes larger US employers file a notice about 60 days before a mass layoff or a
+plant closure. That's a two-month head start for the affected workers and for anyone trying to
+hire them. But every state publishes the notices its own way: HTML tables, PDFs, CSV downloads,
+search forms, sometimes behind a WAF. And the sites change without warning.
+
+The first version (2022) had about 33 hand-written scrapers that broke every time a state
+redesigned its site, plus a brittle Selenium enrichment scraper that produced most of the bad
+data. Keeping it running was the whole job.
+
+## Approach
+
+The rebuild is designed around one assumption: **scrapers will break, so make a break cheap to
+fix.**
+
+<Flow
+  caption="Nightly pipeline. A failed parse saves a replayable snapshot instead of losing the run."
+  steps={[
+    { label: 'Fetch', detail: '48 jurisdictions · daily CronJob' },
+    { label: 'Parse + validate', detail: 'row-count range, required fields' },
+    { label: 'Postgres', detail: 'dedup across re-filings', highlight: true },
+    { label: 'Enrich', detail: 'Claude + web search · every 6 h' },
+    { label: 'API + SPA', detail: 'dashboard, map, reports' },
+  ]}
+  note="On a parse failure the raw response is saved; /heal-scraper replays it, fixes parse(), and opens a PR for review."
+/>
+
+- **The fetch/parse split.** Each state module fetches raw bytes and parses them separately. When
+  parsing or validation fails, the runner saves the exact response as a snapshot, so the
+  breakage can be reproduced offline, byte for byte.
+- **Repair is a reviewed PR, not magic.** A Claude Code operation reproduces the break live,
+  fixes `parse()` until it handles the new page *and* still passes the golden fixture, runs the
+  tests, and opens a pull request. A human merges it, because merging is a production deploy.
+- **Enrichment with confidence scores.** An LLM agent with web search fills in company details
+  (industry, size, HQ) and records how confident it is. Low-confidence rows can be re-run
+  selectively instead of being trusted blindly.
+- **Context, not just counts.** Each layoff time series sits next to official BLS data
+  (unemployment, payrolls, JOLTS) for the same period, so a spike can be read against the wider
+  labor market.
+
+## Hard parts
+
+- **Hostile sites.** Some state sites never reach network-idle, some reject plain HTTP clients,
+  and one WAF resets TLS handshakes from anything that doesn't look like a browser. Each needed
+  its own fetch strategy: a real browser context, shared session cookies, or TLS
+  fingerprint impersonation with retries.
+- **Silent failures.** A malformed BLS series ID isn't an error. It comes back as a valid series
+  with no data. So the job checks *coverage*, not status codes, and tests pin every ID layout.
+- **Duplicates.** States re-file and amend notices. Deduplication has to merge them without
+  collapsing genuinely separate layoffs at the same employer.
+
+## Outcome
+
+- **48 jurisdictions** (47 states plus DC) scraped daily. The remaining three publish no usable
+  public data, and each is documented.
+- **Enrichment every 6 hours**, with re-runs for low-confidence rows.
+- **About 225 BLS series** refreshed weekly as economic context.
+- A breakage costs **one reviewed PR**, not a rewrite.
+- Runs in production on the [homelab](/work/homelab/): Kubernetes CronJobs, CloudNativePG, and
+  Grafana and Alertmanager watching scraper health.

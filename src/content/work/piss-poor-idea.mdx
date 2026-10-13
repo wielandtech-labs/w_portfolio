@@ -1,0 +1,62 @@
+---
+title: Piss Poor Idea
+slug: piss-poor-idea
+tagline: A restroom QR ad network. Venues host stickers, patrons scan, and ad revenue is split across venues by traffic.
+year: '2026'
+status: live
+role: 'Sole developer: product, build, ops'
+stack: [Django, PostgreSQL, ntfy, Kubernetes]
+links:
+  live: https://pisspooridea.com
+cover: ../../assets/covers/piss-poor-idea.svg
+coverAlt: A QR code next to bars showing each venue's share of revenue.
+featured: false
+order: 4
+---
+
+import Flow from '../../components/Flow.astro';
+
+## Problem
+
+Bars and cafés have a captive audience in their restrooms and no easy way to make money from it.
+Advertisers want local reach without the creepiness of tracked ads. Making a two-sided network
+work for a handful of venues means being fair about the revenue split, and private about the
+people scanning.
+
+## Approach
+
+<Flow
+  caption="From a sticker on a wall to a fair payout. Visitor identity is a per-day hash, never a raw IP."
+  steps={[
+    { label: 'Signed agreement', detail: 'no contract, no stickers' },
+    { label: 'Sticker scan', detail: 'permanent short code' },
+    { label: 'Daily visitor hash', detail: 'HMAC · rotates daily', highlight: true },
+    { label: 'Revenue period', detail: 'traffic-weighted split' },
+    { label: 'Venue payout', detail: 'shown on the venue board' },
+  ]}
+/>
+
+- **Two faces, one app.** A straight-laced agency site for venues and advertisers, and a playful
+  guerrilla site for patrons. The request's host picks the face, and short codes work on both.
+- **Fair split.** Revenue for a period is shared in proportion to each venue's de-duplicated
+  traffic. A visitor's identity is a daily HMAC of request attributes plus a one-day cookie, so
+  repeat scans don't inflate a share and no raw IP is ever stored.
+- **Operations built in.** Patrons can rate a restroom or report a problem. Staff get a push
+  alert (deduplicated per sticker and issue), and notifications can never break the request
+  that triggered them.
+
+## Hard parts
+
+- **A leaderboard that never shames.** The "cleanest restroom" ranking lists only venues that
+  opted in and have enough ratings, ranked by a Bayesian average. The network-wide mean includes
+  unlisted venues, so opting in can't shift the bar.
+- **Legal text that can't silently drift.** Venue agreements and advertiser terms are versioned
+  files pinned by hash. Changing the text means a new version, not an edit.
+- **Real-browser-only bugs.** A strict referrer policy made browsers send `Origin: null` on the
+  page's own form posts, which failed CSRF checks. The test client never sends an Origin header,
+  so a regression test now guards it.
+
+## Outcome
+
+- Live, with the venue onboarding, sticker printing, scan, feedback and payout flows in place.
+- Every printed code is permanent, and the system is built around that constraint.

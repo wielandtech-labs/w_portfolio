@@ -1,0 +1,69 @@
+---
+title: K3s homelab platform
+slug: homelab
+tagline: A small production platform in a closet. GitOps with Flux, a review app for every pull request, managed Postgres, and full observability.
+year: '2025–2026'
+status: live
+role: 'Sole architect and operator'
+stack: [Kubernetes, K3s, Flux, Helm, CloudNativePG, Prometheus, Grafana, Loki, GitHub Actions]
+links:
+  live: https://raphaelwieland.com/homelab/
+cover: ../../assets/covers/homelab.svg
+coverAlt: Diagram of connected cluster nodes.
+featured: true
+order: 3
+---
+
+import Flow from '../../components/Flow.astro';
+
+## Problem
+
+Side projects usually die in deployment. Every new app needs hosting, TLS, a database, backups,
+monitoring and a way to try changes before they go live. Doing that by hand per app is how
+projects stall. The goal was a platform where shipping a new app is a template and a pull
+request, and where the deploy process itself stops mistakes.
+
+## Approach
+
+Everything is declared in one Git repository and reconciled by Flux. Nothing is changed in the
+cluster by hand.
+
+<Flow
+  caption="The promotion ladder every app uses. Image tags drive each step; Git records every change."
+  steps={[
+    { label: 'Pull request', detail: 'pr-<n> image' },
+    { label: 'Review app', detail: 'pr-<n>-<app>.review…', highlight: true },
+    { label: 'Dev', detail: 'auto-tracks dev-* tags' },
+    { label: 'QA (opt-in)', detail: 'pinned · promote workflow' },
+    { label: 'Prod', detail: 'main merge → verified rollout' },
+  ]}
+/>
+
+- **Review apps for every PR.** Opening a pull request in any app repo builds an image and
+  dispatches an event. The platform repo then generates an isolated namespace, hostname and TLS
+  certificate for it. Closing the PR tears it all down.
+- **Gates built into the workflows.** The org is on GitHub's free plan, so there are no
+  server-side required reviewers. The gates live in the workflows instead: promotions poll the
+  CI check before merging, and a post-merge job verifies that the new image actually rolled out.
+- **One shared, backed-up Postgres.** CloudNativePG runs a single cluster. Apps get isolated
+  databases and roles from a manifest, with nightly volume snapshots and a 14-day retention.
+- **CI inside the cluster.** Ephemeral GitHub Actions runners and a shared remote BuildKit, so
+  there's no Docker daemon anywhere, including on the dev machine.
+- **Observability.** Prometheus, Grafana, Loki (14 days of logs for every pod), Alertmanager
+  pushing to phones, and an external dead-man's switch that reports when the whole lab is down.
+
+## Hard parts
+
+- **Upgrading Flux safely.** Each Flux minor version drops old API versions, so manifests have
+  to be migrated *before* the controllers are swapped. Otherwise anything still on a removed
+  version silently stops applying.
+- **Automated dependency updates without footguns.** Renovate automerges only patch-level image
+  updates and minor chart updates, and only after CI is green. Everything else waits for review.
+- **Public ingress from home.** A small cloud front end passes TLS through to the cluster over a
+  tunnel, with PROXY protocol so apps still see real client IPs.
+
+## Outcome
+
+The strip on the [home page](/) is live data from this cluster. As of this writing it runs
+**3 nodes, ~80 deployments and ~140 pods**. It hosts 12 apps wired for review apps, and has
+handled **100+ review-app deployments** through pull requests.

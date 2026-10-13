@@ -1,0 +1,64 @@
+---
+import Base from '../layouts/Base.astro';
+import CTA from '../components/CTA.astro';
+import { services } from '../lib/services';
+---
+
+<Base
+  title="Services"
+  description="Consulting from WielandTech: Kubernetes and GitOps platforms, Django apps, data pipelines and LLM integration."
+>
+  <div class="mx-auto max-w-6xl px-4 pt-16 sm:px-6">
+    <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">Services</h1>
+    <p class="mt-4 max-w-2xl text-lg leading-relaxed text-muted">
+      I take on a small number of engagements at a time: a fixed-scope build, an audit, or an ongoing retainer. You work
+      directly with the person who writes the code and runs it in production.
+    </p>
+
+    <div class="mt-12 grid gap-6 lg:grid-cols-2">
+      {
+        services.map((s) => (
+          <section
+            id={s.id}
+            aria-labelledby={`${s.id}-h`}
+            class="flex flex-col rounded-2xl border border-border bg-surface p-6 sm:p-8"
+          >
+            <h2 id={`${s.id}-h`} class="text-xl font-bold tracking-tight">
+              {s.title}
+            </h2>
+            <p class="mt-3 leading-relaxed text-muted">{s.summary}</p>
+            <h3 class="mt-6 text-sm font-semibold">What you get</h3>
+            <ul class="mt-2 space-y-1.5 text-sm">
+              {s.deliverables.map((d) => (
+                <li class="flex gap-2">
+                  <span class="text-accent" aria-hidden="true">
+                    ✓
+                  </span>
+                  {d}
+                </li>
+              ))}
+            </ul>
+            <h3 class="mt-6 text-sm font-semibold">Typical engagement</h3>
+            <p class="mt-2 text-sm text-muted">{s.engagement}</p>
+            <p class="mt-auto pt-6 text-sm">
+              Proof:{' '}
+              <a class="font-semibold text-accent hover:underline" href={`/work/${s.proof.slug}/`}>
+                {s.proof.label} &rarr;
+              </a>
+            </p>
+          </section>
+        ))
+      }
+    </div>
+
+    <section aria-labelledby="pricing-h" class="mt-16 max-w-3xl">
+      <h2 id="pricing-h" class="text-2xl font-bold tracking-tight">Pricing</h2>
+      <p class="mt-3 leading-relaxed text-muted">
+        Contact me for a quote. Every engagement is priced up front after a short call about scope: fixed-scope work gets
+        a fixed price, and retainers are a monthly rate.
+      </p>
+    </section>
+
+    <div class="mt-10"><CTA href="/contact/">Start a conversation</CTA></div>
+  </div>
+</Base>

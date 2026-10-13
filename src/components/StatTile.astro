@@ -1,0 +1,13 @@
+---
+interface Props {
+  stat: string;
+  label: string;
+}
+const { stat, label } = Astro.props;
+---
+
+<div class="rounded-xl border border-border bg-surface p-4">
+  <dt class="text-xs text-muted">{label}</dt>
+  <dd class="mt-1 font-mono text-2xl font-semibold tabular-nums" data-stat={stat}>&mdash;</dd>
+  <dd class="mt-0.5 h-4 font-mono text-xs text-muted" data-stat-detail={stat}></dd>
+</div>

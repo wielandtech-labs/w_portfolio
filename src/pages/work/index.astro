@@ -1,0 +1,20 @@
+---
+import Base from '../../layouts/Base.astro';
+import Card from '../../components/Card.astro';
+import { getWork } from '../../lib/work';
+
+const work = await getWork();
+---
+
+<Base title="Work" description="Case studies: systems Raphael Wieland designed, built and runs in production.">
+  <div class="mx-auto max-w-6xl px-4 pt-16 sm:px-6">
+    <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">Work</h1>
+    <p class="mt-4 max-w-2xl text-lg text-muted">
+      Each of these is live, in production, and run by me. Each one covers the problem, how it's built, what was hard,
+      and what it does today.
+    </p>
+    <div class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      {work.map((entry) => <Card entry={entry} headingLevel="h2" />)}
+    </div>
+  </div>
+</Base>
