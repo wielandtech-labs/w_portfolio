@@ -1,20 +1,20 @@
 ---
 import Base from '../../layouts/Base.astro';
-import Card from '../../components/Card.astro';
+import WorkRow from '../../components/WorkRow.astro';
 import { getWork } from '../../lib/work';
 
 const work = await getWork();
 ---
 
 <Base title="Work" description="Case studies: systems Raphael Wieland designed, built and runs in production.">
-  <div class="mx-auto max-w-6xl px-4 pt-16 sm:px-6">
-    <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">Work</h1>
-    <p class="mt-4 max-w-2xl text-lg text-muted">
-      Each of these is live, in production, and run by me. Each one covers the problem, how it's built, what was hard,
-      and what it does today.
+  <div class="mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-16">
+    <p class="label">{String(work.length).padStart(2, '0')} case studies · all running in production</p>
+    <h1 class="display mt-3 text-6xl sm:text-8xl">Work<span class="text-accent" aria-hidden="true">.</span></h1>
+    <p class="mt-6 max-w-2xl text-lg leading-snug text-muted">
+      Each one is live and run by me. Each covers the problem, how it's built, what was hard, and what it does today.
     </p>
-    <div class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-      {work.map((entry) => <Card entry={entry} headingLevel="h2" />)}
-    </div>
+    <ol class="mt-12">
+      {work.map((entry, i) => <WorkRow entry={entry} index={i} headingLevel="h2" />)}
+    </ol>
   </div>
 </Base>

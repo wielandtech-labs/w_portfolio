@@ -19,6 +19,8 @@ const work = defineCollection({
       }),
       cover: image(),
       coverAlt: z.string(),
+      // The one number a work row leads with, e.g. { value: '48', label: 'jurisdictions' }.
+      metric: z.object({ value: z.string(), label: z.string() }),
       featured: z.boolean(),
       order: z.number().int(),
     }),

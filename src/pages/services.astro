@@ -8,57 +8,65 @@ import { services } from '../lib/services';
   title="Services"
   description="Consulting from WielandTech: Kubernetes and GitOps platforms, Django apps, data pipelines and LLM integration."
 >
-  <div class="mx-auto max-w-6xl px-4 pt-16 sm:px-6">
-    <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">Services</h1>
-    <p class="mt-4 max-w-2xl text-lg leading-relaxed text-muted">
-      I take on a small number of engagements at a time: a fixed-scope build, an audit, or an ongoing retainer. You work
-      directly with the person who writes the code and runs it in production.
+  <div class="mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-16">
+    <p class="label">{String(services.length).padStart(2, '0')} practice areas · fixed scope, audit or retainer</p>
+    <h1 class="display mt-3 text-6xl sm:text-8xl">Services<span class="text-accent" aria-hidden="true">.</span></h1>
+    <p class="mt-6 max-w-2xl text-lg leading-snug text-muted">
+      I take on a small number of engagements at a time. You work directly with the person who writes the code and
+      runs it in production.
     </p>
 
-    <div class="mt-12 grid gap-6 lg:grid-cols-2">
+    <ol class="mt-12">
       {
-        services.map((s) => (
-          <section
-            id={s.id}
-            aria-labelledby={`${s.id}-h`}
-            class="flex flex-col rounded-2xl border border-border bg-surface p-6 sm:p-8"
-          >
-            <h2 id={`${s.id}-h`} class="text-xl font-bold tracking-tight">
-              {s.title}
-            </h2>
-            <p class="mt-3 leading-relaxed text-muted">{s.summary}</p>
-            <h3 class="mt-6 text-sm font-semibold">What you get</h3>
-            <ul class="mt-2 space-y-1.5 text-sm">
-              {s.deliverables.map((d) => (
-                <li class="flex gap-2">
-                  <span class="text-accent" aria-hidden="true">
-                    ✓
-                  </span>
-                  {d}
-                </li>
-              ))}
-            </ul>
-            <h3 class="mt-6 text-sm font-semibold">Typical engagement</h3>
-            <p class="mt-2 text-sm text-muted">{s.engagement}</p>
-            <p class="mt-auto pt-6 text-sm">
-              Proof:{' '}
-              <a class="font-semibold text-accent hover:underline" href={`/work/${s.proof.slug}/`}>
-                {s.proof.label} &rarr;
-              </a>
-            </p>
-          </section>
+        services.map((s, i) => (
+          <li id={s.id} class="grid gap-6 border-b border-fg py-8 first:border-t-[3px] lg:grid-cols-[4rem_1fr_1fr]">
+            <span class="display text-4xl" aria-hidden="true">
+              {String(i + 1).padStart(2, '0')}
+            </span>
+            <div>
+              <h2 class="display text-3xl sm:text-4xl">{s.title}</h2>
+              <p class="mt-3 max-w-md leading-snug text-muted">{s.summary}</p>
+              <p class="mt-5">
+                <span class="label">Proof</span>
+                <a
+                  class="ml-2 font-extrabold underline decoration-accent decoration-[3px] underline-offset-4"
+                  href={`/work/${s.proof.slug}/`}
+                >
+                  {s.proof.label} &rarr;
+                </a>
+              </p>
+            </div>
+            <div class="grid content-start gap-5 sm:grid-cols-2 lg:grid-cols-1">
+              <div>
+                <h3 class="label">What you get</h3>
+                <ul class="mt-2 space-y-1.5 text-[0.95rem]">
+                  {s.deliverables.map((d) => (
+                    <li class="flex gap-2">
+                      <span class="mt-[0.45em] size-2 shrink-0 bg-accent" aria-hidden="true" />
+                      {d}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3 class="label">Typical engagement</h3>
+                <p class="mt-2 text-[0.95rem]">{s.engagement}</p>
+              </div>
+            </div>
+          </li>
         ))
       }
-    </div>
+    </ol>
 
-    <section aria-labelledby="pricing-h" class="mt-16 max-w-3xl">
-      <h2 id="pricing-h" class="text-2xl font-bold tracking-tight">Pricing</h2>
-      <p class="mt-3 leading-relaxed text-muted">
-        Contact me for a quote. Every engagement is priced up front after a short call about scope: fixed-scope work gets
-        a fixed price, and retainers are a monthly rate.
-      </p>
+    <section aria-labelledby="pricing-h" class="mt-16 grid gap-6 bg-fg p-6 text-bg sm:p-10 lg:grid-cols-3 lg:items-end">
+      <div class="lg:col-span-2">
+        <h2 id="pricing-h" class="display text-4xl sm:text-5xl">Pricing</h2>
+        <p class="mt-3 max-w-xl text-bg/80">
+          Contact me for a quote. Every engagement is priced up front after a short call about scope: fixed-scope work
+          gets a fixed price, and retainers are a monthly rate.
+        </p>
+      </div>
+      <div class="lg:justify-self-end"><CTA href="/contact/">Start a conversation</CTA></div>
     </section>
-
-    <div class="mt-10"><CTA href="/contact/">Start a conversation</CTA></div>
   </div>
 </Base>

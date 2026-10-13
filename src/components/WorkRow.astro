@@ -1,0 +1,43 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+// One case study as a full-width status row: number, name and tagline, its
+// headline metric, live status and stack. The whole row is the link.
+interface Props {
+  entry: CollectionEntry<'work'>;
+  index: number;
+  headingLevel?: 'h2' | 'h3';
+}
+const { entry, index, headingLevel = 'h3' } = Astro.props;
+const { title, tagline, stack, status, metric, slug } = entry.data;
+const Heading = headingLevel;
+const statusLabel = { live: 'Live', archived: 'Archived', wip: 'In progress' }[status];
+const num = String(index + 1).padStart(2, '0');
+---
+
+<li class="group relative border-b border-fg first:border-t-[3px]">
+  <div class="grid grid-cols-[2.5rem_1fr] gap-x-3 gap-y-3 py-5 sm:grid-cols-[3.5rem_1fr_9rem] lg:grid-cols-[3.5rem_1fr_11rem_11rem]">
+    <span class="display pt-1 text-2xl sm:text-3xl" aria-hidden="true">{num}</span>
+    <div class="min-w-0">
+      <Heading class="display text-2xl sm:text-4xl">
+        <a href={`/work/${slug}/`} class="decoration-accent decoration-[3px] underline-offset-4 after:absolute after:inset-0 group-hover:underline">
+          {title}
+        </a>
+      </Heading>
+      <p class="mt-2 max-w-xl text-[0.95rem] leading-snug text-muted">{tagline}</p>
+    </div>
+    <p class="col-start-2 sm:col-start-3 sm:row-start-1 sm:text-right">
+      <span class="display block text-4xl sm:text-5xl">{metric.value}</span>
+      <span class="label">{metric.label}</span>
+    </p>
+    <div class="col-start-2 flex flex-col gap-2 lg:col-start-4 lg:row-start-1 lg:items-end">
+      <p class="label flex items-center gap-2 text-fg">
+        {status === 'live' && <span class="live-dot" aria-hidden="true" />}
+        {statusLabel}
+      </p>
+      <ul class="flex flex-wrap gap-1 lg:justify-end" aria-label="Stack">
+        {stack.slice(0, 3).map((s) => <li class="font-mono text-xs text-muted">{s}</li>)}
+      </ul>
+    </div>
+  </div>
+</li>
