@@ -1,0 +1,126 @@
+---
+import StatTile from './StatTile.astro';
+
+const tiles = [
+  { stat: 'pods', label: 'Pods running' },
+  { stat: 'deployments', label: 'Deployments healthy' },
+  { stat: 'cpu', label: 'CPU' },
+  { stat: 'memory', label: 'Memory' },
+  { stat: 'nodes', label: 'Nodes up' },
+  { stat: 'uptime', label: 'Uptime' },
+];
+---
+
+<div data-live-stats>
+  <dl class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+    {tiles.map((t) => <StatTile {...t} />)}
+  </dl>
+  <p class="mt-3 flex items-center gap-2 font-mono text-xs text-muted" role="status" aria-live="polite">
+    <span class="inline-block size-2 rounded-full bg-border" data-stats-dot aria-hidden="true"></span>
+    <span data-stats-status>Loading live stats…</span>
+  </p>
+</div>
+
+<script>
+  // Polls the homelab metrics (same-origin; nginx proxies to w_tech) and
+  // fills the StatTiles. Failure leaves the layout intact with a message.
+  type Metrics = {
+    cpu?: { percentage: number; total_cores: number };
+    memory?: { percentage: number; used_gb: number; total_gb: number };
+    pods?: { count: number };
+    uptime?: { formatted: string };
+    deployments?: { total: number; healthy: number };
+    nodes_count?: number;
+    reachable_nodes?: number;
+  };
+
+  const POLL_MS = 30_000;
+  const TIMEOUT_MS = 6_000;
+
+  const root = document.querySelector<HTMLElement>('[data-live-stats]');
+  if (root) {
+    const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const status = root.querySelector<HTMLElement>('[data-stats-status]')!;
+    const dot = root.querySelector<HTMLElement>('[data-stats-dot]')!;
+    const value = (k: string) => root.querySelector<HTMLElement>(`[data-stat="${k}"]`);
+    const detail = (k: string) => root.querySelector<HTMLElement>(`[data-stat-detail="${k}"]`);
+    let first = true;
+    let timer: number | undefined;
+
+    const setText = (k: string, text: string, sub = '') => {
+      const v = value(k);
+      const d = detail(k);
+      if (v) v.textContent = text;
+      if (d) d.textContent = sub;
+    };
+
+    // Count up from 0 on the first successful load only, and never when the
+    // visitor asked for reduced motion.
+    const setNumber = (k: string, n: number, fmt: (x: number) => string, sub = '') => {
+      const v = value(k);
+      if (!v) return;
+      if (!first || reduceMotion) return setText(k, fmt(n), sub);
+      const start = performance.now();
+      const step = (now: number) => {
+        const t = Math.min(1, (now - start) / 700);
+        v.textContent = fmt(n * (1 - Math.pow(1 - t, 3)));
+        if (t < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+      const d = detail(k);
+      if (d) d.textContent = sub;
+    };
+
+    const int = (x: number) => Math.round(x).toString();
+    const pct = (x: number) => `${Math.round(x)}%`;
+
+    const render = (m: Metrics) => {
+      if (m.pods) setNumber('pods', m.pods.count, int);
+      if (m.deployments)
+        setNumber('deployments', m.deployments.healthy, int, `of ${m.deployments.total}`);
+      if (m.cpu) setNumber('cpu', m.cpu.percentage, pct, `${m.cpu.total_cores} cores`);
+      if (m.memory)
+        setNumber('memory', m.memory.percentage, pct, `${m.memory.used_gb.toFixed(0)} / ${m.memory.total_gb.toFixed(0)} GB`);
+      if (m.nodes_count !== undefined)
+        setNumber('nodes', m.reachable_nodes ?? 0, int, `of ${m.nodes_count}`);
+      if (m.uptime) setText('uptime', m.uptime.formatted);
+      first = false;
+    };
+
+    const setStatus = (ok: boolean) => {
+      dot.classList.toggle('bg-accent', ok);
+      dot.classList.toggle('bg-border', !ok);
+      status.textContent = ok
+        ? `Live from the homelab · updated ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+        : 'Live stats unavailable right now.';
+    };
+
+    const load = async () => {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
+      try {
+        const res = await fetch('/api/metrics/', { signal: ctrl.signal, headers: { Accept: 'application/json' } });
+        if (!res.ok) throw new Error(String(res.status));
+        render((await res.json()) as Metrics);
+        setStatus(true);
+      } catch {
+        setStatus(false);
+      } finally {
+        clearTimeout(t);
+      }
+    };
+
+    const start = () => {
+      if (timer !== undefined) return;
+      void load();
+      timer = window.setInterval(load, POLL_MS);
+    };
+    const stop = () => {
+      window.clearInterval(timer);
+      timer = undefined;
+    };
+
+    document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()));
+    if (!document.hidden) start();
+  }
+</script>

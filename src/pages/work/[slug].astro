@@ -1,0 +1,86 @@
+---
+import { render } from 'astro:content';
+import { Image } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import Tag from '../../components/Tag.astro';
+import CTA from '../../components/CTA.astro';
+import { getWork } from '../../lib/work';
+
+export async function getStaticPaths() {
+  const work = await getWork();
+  return work.map((entry, i) => ({
+    params: { slug: entry.data.slug },
+    props: { entry, next: work[(i + 1) % work.length]! },
+  }));
+}
+
+const { entry, next } = Astro.props;
+const { title, tagline, year, status, role, stack, links, cover, coverAlt, slug } = entry.data;
+const { Content } = await render(entry);
+const statusLabel = { live: 'Live', archived: 'Archived', wip: 'In progress' }[status];
+---
+
+<Base title={title} description={tagline} ogImage={`/og/${slug}.png`} ogType="article">
+  <article class="mx-auto max-w-6xl px-4 pt-12 sm:px-6">
+    <p class="font-mono text-sm"><a href="/work/" class="text-muted hover:text-fg">&larr; All work</a></p>
+    <header class="mt-6 max-w-3xl">
+      <h1 class="text-4xl font-bold tracking-tight text-balance sm:text-5xl">{title}</h1>
+      <p class="mt-4 text-lg leading-relaxed text-muted">{tagline}</p>
+    </header>
+
+    <dl class="mt-8 grid max-w-3xl grid-cols-2 gap-x-6 gap-y-4 border-y border-border py-6 text-sm sm:grid-cols-4">
+      <div><dt class="text-muted">Role</dt><dd class="mt-1 font-medium">{role}</dd></div>
+      <div><dt class="text-muted">Year</dt><dd class="mt-1 font-medium">{year}</dd></div>
+      <div><dt class="text-muted">Status</dt><dd class="mt-1 font-medium">{statusLabel}</dd></div>
+      {
+        (links.live || links.repo) && (
+          <div>
+            <dt class="text-muted">Links</dt>
+            <dd class="mt-1 flex flex-col gap-1 font-medium">
+              {links.live && (
+                <a class="text-accent hover:underline" href={links.live}>
+                  {new URL(links.live).host}
+                </a>
+              )}
+              {links.repo && (
+                <a class="text-accent hover:underline" href={links.repo}>
+                  Source
+                </a>
+              )}
+            </dd>
+          </div>
+        )
+      }
+    </dl>
+
+    <Image
+      src={cover}
+      alt={coverAlt}
+      loading="eager"
+      class="mt-10 aspect-[16/9] w-full rounded-xl border border-border object-cover"
+    />
+
+    <div class="prose mt-4">
+      <Content />
+      <h2>Stack</h2>
+      <div>
+        <ul class="flex flex-wrap gap-1.5" aria-label="Stack">
+          {stack.map((s) => <Tag label={s} />)}
+        </ul>
+      </div>
+    </div>
+
+    <aside
+      class="mt-16 flex flex-col gap-6 rounded-2xl border border-border bg-surface p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8"
+      aria-label="Next steps"
+    >
+      <div>
+        <p class="font-semibold">Need something like this built?</p>
+        <p class="mt-1 text-sm text-muted">
+          Next case study: <a class="text-accent underline underline-offset-2" href={`/work/${next.data.slug}/`}>{next.data.title}</a>
+        </p>
+      </div>
+      <CTA href="/contact/">Work with me</CTA>
+    </aside>
+  </article>
+</Base>

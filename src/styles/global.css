@@ -1,0 +1,180 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/jetbrains-mono';
+
+/* Local fallbacks sized to Inter's / JetBrains Mono's metrics, so the
+   web-font swap doesn't shift the layout. */
+@font-face {
+  font-family: 'Inter Fallback';
+  src: local('Arial');
+  ascent-override: 90.44%;
+  descent-override: 22.52%;
+  line-gap-override: 0%;
+  size-adjust: 107.12%;
+}
+@font-face {
+  font-family: 'JetBrains Mono Fallback';
+  src: local('Courier New');
+  ascent-override: 102%;
+  descent-override: 30%;
+  line-gap-override: 0%;
+  size-adjust: 100%;
+}
+
+/* Theme: light by default, dark from the OS preference, and an explicit
+   choice (data-theme on <html>, set by /theme.js) overrides both. */
+:root {
+  --bg: #ffffff;
+  --surface: #f5f7f9;
+  --surface-2: #eaeef2;
+  --fg: #0f172a;
+  --muted: #475569;
+  --border: #d7dde4;
+  --accent: #0f766e;
+  --accent-fg: #ffffff;
+  --accent-soft: #ccfbf1;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #0b0f14;
+    --surface: #121821;
+    --surface-2: #1a222d;
+    --fg: #e6edf3;
+    --muted: #9aa7b6;
+    --border: #263241;
+    --accent: #5eead4;
+    --accent-fg: #042f2e;
+    --accent-soft: #123a37;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --bg: #0b0f14;
+  --surface: #121821;
+  --surface-2: #1a222d;
+  --fg: #e6edf3;
+  --muted: #9aa7b6;
+  --border: #263241;
+  --accent: #5eead4;
+  --accent-fg: #042f2e;
+  --accent-soft: #123a37;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-soft: var(--accent-soft);
+  --font-sans: 'Inter Variable', 'Inter Fallback', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono Fallback', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+@layer base {
+  html {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    background: var(--bg);
+    min-height: 100dvh;
+  }
+  :focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+  ::selection {
+    background: var(--accent-soft);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+}
+
+/* Long-form case-study body. Kept here instead of a typography plugin. */
+@layer components {
+  .prose {
+    max-width: 68ch;
+    line-height: 1.7;
+    color: var(--fg);
+  }
+  .prose > * + * {
+    margin-top: 1.1em;
+  }
+  .prose h2 {
+    margin-top: 2.4em;
+    font-size: 1.5rem;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+  }
+  .prose h3 {
+    margin-top: 1.8em;
+    font-size: 1.15rem;
+    font-weight: 650;
+  }
+  .prose a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .prose > ul {
+    list-style: disc;
+    padding-left: 1.4em;
+  }
+  .prose > ol {
+    list-style: decimal;
+    padding-left: 1.4em;
+  }
+  .prose > :is(ul, ol) > li + li {
+    margin-top: 0.4em;
+  }
+  .prose strong {
+    font-weight: 650;
+  }
+  .prose code {
+    font-family: var(--font-mono);
+    font-size: 0.88em;
+    background: var(--surface-2);
+    padding: 0.1em 0.35em;
+    border-radius: 4px;
+  }
+  .prose figure {
+    margin-top: 2em;
+    margin-bottom: 2em;
+  }
+  .prose figcaption {
+    margin-top: 0.6em;
+    font-size: 0.875rem;
+    color: var(--muted);
+  }
+  .prose table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+  }
+  .prose th,
+  .prose td {
+    border-bottom: 1px solid var(--border);
+    padding: 0.5em 0.6em;
+    text-align: left;
+    vertical-align: top;
+  }
+  .prose th {
+    font-weight: 650;
+  }
+}

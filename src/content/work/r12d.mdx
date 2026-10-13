@@ -1,0 +1,65 @@
+---
+title: r12d
+slug: r12d
+tagline: Privacy-first QR stickers, short links, a photo inventory and lost-and-found for households and small businesses.
+year: '2026'
+status: live
+role: 'Sole developer: product, build, ops'
+stack: [Django, PostgreSQL, S3, Kubernetes, Flux]
+links:
+  live: https://r12d.ch
+cover: ../../assets/covers/r12d.svg
+coverAlt: A stylised QR code.
+featured: true
+order: 2
+---
+
+import Flow from '../../components/Flow.astro';
+
+## Problem
+
+QR codes are everywhere, and most QR services make money by tracking whoever scans them. For a
+household labelling storage boxes, or a small business tagging equipment, that's a bad trade.
+They need durable codes, an inventory behind them, and a way for an honest finder to report
+something lost. They don't need an ad-tech profile of every scan.
+
+## Approach
+
+One Django service with two faces, picked by the request's host:
+
+<Flow
+  caption="Host-based split: one deployment, two sites, with the privacy rules enforced in code and tests."
+  steps={[
+    { label: 'Sticker scan', detail: 'r12d.ch/<code>' },
+    { label: 'Public host', detail: 'short codes, lost & found, marketing' },
+    { label: 'Anonymous daily count', detail: 'no IP, no UA, no per-scan row', highlight: true },
+    { label: 'App host', detail: 'inventory, photos, CRM, loans' },
+  ]}
+/>
+
+- **No visitor tracking, by construction.** No IP address, user agent or per-scan row is ever
+  stored. Scans become anonymous daily counts. The public host sets no cookies for anonymous
+  visitors, and the app server runs without an access log. A dedicated test suite guards
+  everything the app can enforce.
+- **Workspaces as the tenancy boundary.** Every query goes through one membership check, and
+  child objects are always looked up scoped to that workspace, never by a bare ID. Non-members
+  get a 404, not a 403, so the app doesn't confirm that something exists.
+- **Permanent codes.** A printed sticker can't be recalled, so short codes are generated once
+  and never reused. A code is deactivated, never deleted.
+
+## Hard parts
+
+- **Two hosts, one URL config.** In production each host knows only its own routes, so a link
+  that crosses hosts has to be built explicitly. Single-host tests miss that kind of bug, so a
+  split-mode test exists for every cross-host path. That's how a 500 error on every
+  lost-and-found report was caught in review, before it shipped.
+- **Back office off the internet.** The admin is reachable only over a private network.
+  Ingress routes by Host header, so even an internal-looking hostname would be publicly
+  reachable. The app rejects admin requests on every other host.
+
+## Outcome
+
+- Live at **r12d.ch**, with the product on its own host.
+- Privacy is a set of tested rules, not a promise on a marketing page.
+- Ships through the same review-app → dev → prod pipeline as everything else on the
+  [homelab](/work/homelab/).

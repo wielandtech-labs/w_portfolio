@@ -1,0 +1,31 @@
+---
+import Base from '../layouts/Base.astro';
+import CTA from '../components/CTA.astro';
+
+const email = 'raphael@wielandtech.com';
+const subject = encodeURIComponent('Project inquiry');
+---
+
+<Base title="Contact" description="Get in touch with Raphael Wieland about a project.">
+  <div class="mx-auto max-w-3xl px-4 pt-16 sm:px-6">
+    <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">Contact</h1>
+    <p class="mt-4 text-lg leading-relaxed text-muted">
+      Email is the quickest way to reach me. A few lines are enough to start: what you're building, where it runs today,
+      and what's in the way.
+    </p>
+
+    <div class="mt-10 rounded-2xl border border-border bg-surface p-6 sm:p-8">
+      <h2 class="text-sm font-semibold text-muted">Email</h2>
+      <p class="mt-2 font-mono text-lg break-all">{email}</p>
+      <div class="mt-6 flex flex-wrap gap-3">
+        <CTA href={`mailto:${email}?subject=${subject}`}>Email me</CTA>
+        <CTA href="https://raphaelwieland.com/contact/" variant="secondary">Use the contact form</CTA>
+      </div>
+    </div>
+
+    <p class="mt-8 text-sm text-muted">
+      Looking for my background and resume?
+      <a class="text-accent underline underline-offset-2" href="https://raphaelwieland.com/">About me &rarr;</a>
+    </p>
+  </div>
+</Base>

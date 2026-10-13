@@ -1,0 +1,58 @@
+---
+title: One Django app, two domains
+slug: w-tech
+tagline: The personal site behind raphaelwieland.com. One image served two domains, with CI that refuses to ship a broken deploy.
+year: '2021–2026'
+status: live
+role: 'Sole developer'
+stack: [Django, PostgreSQL, Redis, GitHub Actions, Kubernetes]
+links:
+  live: https://raphaelwieland.com
+cover: ../../assets/covers/w-tech.svg
+coverAlt: One Django box routing to two domain names.
+featured: false
+order: 5
+---
+
+import Flow from '../../components/Flow.astro';
+
+## Problem
+
+A long-running Django site (blog, photography, accounts, a resume) needed to become two sites: a
+personal one and a professional portfolio. Old links had to keep working, and running two
+codebases for one person wasn't worth it.
+
+## Approach
+
+<Flow
+  caption="Host-based routing in one deployment. Anything the portfolio didn't serve redirected permanently to the personal site."
+  steps={[
+    { label: 'Request', detail: 'either domain' },
+    { label: 'Host middleware', detail: 'portfolio or personal?', highlight: true },
+    { label: 'Portfolio paths', detail: '/, /homelab/, /contact/' },
+    { label: '308 → personal site', detail: 'path + query kept' },
+  ]}
+/>
+
+- **One app, two hosts.** A middleware picked the face per request. On the portfolio domain,
+  every path it didn't own returned a 308 with the path and query intact, so years of shared
+  links kept working.
+- **CI that gates deploys.** Merging to `main` is a production deploy, so CI stops the image
+  build if a model change lacks its committed migration. Docs-only changes still satisfy the
+  required check through a companion workflow, so they don't need a pointless build.
+- **Review app per PR.** Every pull request gets its own copy of the site, with its own database
+  and hostname, before anything merges.
+
+## Hard parts
+
+- **Hostnames live in code.** `ALLOWED_HOSTS`, CSRF origins and the CSP host list are all in the
+  app. Adding a domain is an app change that has to deploy *before* the ingress change, or the
+  new host returns 400 until it does.
+- **Migrating without downtime.** The site framework, password-reset links and the sitemap all
+  point at one canonical domain. That pointer was moved with a data migration, not by hand.
+
+## Outcome
+
+The split worked, and this portfolio is its next step. wielandtech.com is now a static site
+([this one](/)), and raphaelwieland.com stays the personal site. The routing pattern and the
+deploy gates carried over to every other app on the [platform](/work/homelab/).
