@@ -22,7 +22,9 @@
       btn.setAttribute('aria-label', dark ? 'Switch to light theme' : 'Switch to dark theme');
     }
     sync();
-    btn.classList.remove("invisible");
+    // With no saved choice the page follows the OS live; keep the button honest.
+    matchMedia('(prefers-color-scheme: dark)').addEventListener('change', sync);
+    btn.classList.remove('invisible');
     btn.addEventListener('click', function () {
       var next = current() === 'dark' ? 'light' : 'dark';
       root.dataset.theme = next;

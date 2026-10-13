@@ -15,9 +15,10 @@ const tiles = [
   <dl class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
     {tiles.map((t) => <StatTile {...t} />)}
   </dl>
-  <p class="mt-3 flex items-center gap-2 font-mono text-xs text-muted" role="status" aria-live="polite">
+  <p class="mt-3 flex items-center gap-2 font-mono text-xs text-muted">
     <span class="inline-block size-2 rounded-full bg-border" data-stats-dot aria-hidden="true"></span>
-    <span data-stats-status>Loading live stats…</span>
+    <span data-stats-status role="status" aria-live="polite">Loading live stats…</span>
+    <span data-stats-updated></span>
   </p>
 </div>
 
@@ -42,6 +43,8 @@ const tiles = [
     const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
     const status = root.querySelector<HTMLElement>('[data-stats-status]')!;
     const dot = root.querySelector<HTMLElement>('[data-stats-dot]')!;
+    const updated = root.querySelector<HTMLElement>('[data-stats-updated]')!;
+    const tiles = [...root.querySelectorAll<HTMLElement>('[data-stat]')].map((el) => el.dataset.stat!);
     const value = (k: string) => root.querySelector<HTMLElement>(`[data-stat="${k}"]`);
     const detail = (k: string) => root.querySelector<HTMLElement>(`[data-stat-detail="${k}"]`);
     let first = true;
@@ -67,6 +70,8 @@ const tiles = [
         if (t < 1) requestAnimationFrame(step);
       };
       requestAnimationFrame(step);
+      // rAF doesn't run in background tabs; never leave the final value to it.
+      setTimeout(() => (v.textContent = fmt(n)), 800);
       const d = detail(k);
       if (d) d.textContent = sub;
     };
@@ -90,9 +95,15 @@ const tiles = [
     const setStatus = (ok: boolean) => {
       dot.classList.toggle('bg-accent', ok);
       dot.classList.toggle('bg-border', !ok);
-      status.textContent = ok
-        ? `Live from the homelab · updated ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
-        : 'Live stats unavailable right now.';
+      // Only the state goes in the live region, so screen readers hear a
+      // change (live <-> unavailable), not a new timestamp every poll.
+      const text = ok ? 'Live from the homelab' : 'Live stats unavailable right now.';
+      if (status.textContent !== text) status.textContent = text;
+      updated.textContent = ok
+        ? `· updated ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+        : '';
+      // Never leave old numbers on screen looking live.
+      if (!ok) tiles.forEach((t) => setText(t, '—'));
     };
 
     const load = async () => {
