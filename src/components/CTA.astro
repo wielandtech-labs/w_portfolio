@@ -1,7 +1,8 @@
 ---
 interface Props {
   href: string;
-  variant?: 'primary' | 'secondary';
+  /** 'ink' is for use on the signal-colored fill: always black, both themes. */
+  variant?: 'primary' | 'secondary' | 'ink';
 }
 const { href, variant = 'primary' } = Astro.props;
 ---
@@ -9,11 +10,14 @@ const { href, variant = 'primary' } = Astro.props;
 <a
   href={href}
   class:list={[
-    'inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-5 text-sm font-semibold transition-colors',
-    variant === 'primary'
-      ? 'bg-accent text-accent-fg hover:opacity-90'
-      : 'border border-border text-fg hover:bg-surface-2',
+    'inline-flex min-h-12 items-center justify-center gap-2 border-[3px] px-5 text-sm font-extrabold tracking-wide uppercase transition-colors',
+    {
+      primary: 'border-accent bg-accent text-accent-fg hover:border-fg hover:bg-fg hover:text-bg',
+      secondary: 'border-fg text-fg hover:bg-fg hover:text-bg',
+      ink: 'border-accent-fg text-accent-fg hover:bg-accent-fg hover:text-accent',
+    }[variant],
   ]}
 >
   <slot />
+  <span aria-hidden="true">&rarr;</span>
 </a>

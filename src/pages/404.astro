@@ -4,10 +4,10 @@ import CTA from '../components/CTA.astro';
 ---
 
 <Base title="Not found" description="This page doesn't exist.">
-  <div class="mx-auto max-w-3xl px-4 pt-24 sm:px-6">
-    <p class="font-mono text-sm text-accent">404</p>
-    <h1 class="mt-2 text-4xl font-bold tracking-tight">This page doesn't exist.</h1>
-    <p class="mt-4 text-lg text-muted">It may have moved, or the link has a typo.</p>
+  <div class="mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-16">
+    <p class="label flex items-center gap-2"><span class="live-dot" aria-hidden="true"></span> Status: not found</p>
+    <h1 class="display mt-3 text-[7rem] sm:text-[12rem]">404<span class="text-accent" aria-hidden="true">.</span></h1>
+    <p class="mt-2 max-w-xl text-lg text-muted">This page doesn't exist. It may have moved, or the link has a typo.</p>
     <div class="mt-8 flex flex-wrap gap-3">
       <CTA href="/work/">See the work</CTA>
       <CTA href="/" variant="secondary">Home</CTA>

@@ -10,55 +10,64 @@ export async function getStaticPaths() {
   const work = await getWork();
   return work.map((entry, i) => ({
     params: { slug: entry.data.slug },
-    props: { entry, next: work[(i + 1) % work.length]! },
+    props: { entry, index: i, next: work[(i + 1) % work.length]! },
   }));
 }
 
-const { entry, next } = Astro.props;
-const { title, tagline, year, status, role, stack, links, cover, coverAlt, slug } = entry.data;
+const { entry, index, next } = Astro.props;
+const { title, tagline, year, status, role, stack, links, cover, coverAlt, slug, metric } = entry.data;
 const { Content } = await render(entry);
 const statusLabel = { live: 'Live', archived: 'Archived', wip: 'In progress' }[status];
+const num = String(index + 1).padStart(2, '0');
 ---
 
 <Base title={title} description={tagline} ogImage={`/og/${slug}.png`} ogType="article">
-  <article class="mx-auto max-w-6xl px-4 pt-12 sm:px-6">
-    <p class="font-mono text-sm"><a href="/work/" class="text-muted hover:text-fg">&larr; All work</a></p>
-    <header class="mt-6 max-w-3xl">
-      <h1 class="text-4xl font-bold tracking-tight text-balance sm:text-5xl">{title}</h1>
-      <p class="mt-4 text-lg leading-relaxed text-muted">{tagline}</p>
+  <article class="mx-auto max-w-6xl px-4 pt-10 sm:px-6">
+    <p class="label"><a href="/work/" class="hover:text-fg">&larr; All work</a> <span aria-hidden="true">/</span> {num}</p>
+    <header class="mt-6 grid gap-6 border-t-[3px] border-fg pt-6 lg:grid-cols-3">
+      <div class="lg:col-span-2">
+        <h1 class="display text-5xl text-balance sm:text-7xl">{title}</h1>
+        <p class="mt-5 max-w-2xl text-lg leading-snug text-muted">{tagline}</p>
+      </div>
+      <p class="lg:text-right">
+        <span class="display block text-7xl sm:text-8xl">{metric.value}</span>
+        <span class="label">{metric.label}</span>
+      </p>
     </header>
 
-    <dl class="mt-8 grid max-w-3xl grid-cols-2 gap-x-6 gap-y-4 border-y border-border py-6 text-sm sm:grid-cols-4">
-      <div><dt class="text-muted">Role</dt><dd class="mt-1 font-medium">{role}</dd></div>
-      <div><dt class="text-muted">Year</dt><dd class="mt-1 font-medium">{year}</dd></div>
-      <div><dt class="text-muted">Status</dt><dd class="mt-1 font-medium">{statusLabel}</dd></div>
-      {
-        (links.live || links.repo) && (
-          <div>
-            <dt class="text-muted">Links</dt>
-            <dd class="mt-1 flex flex-col gap-1 font-medium">
-              {links.live && (
-                <a class="text-accent hover:underline" href={links.live}>
-                  {new URL(links.live).host}
-                </a>
-              )}
-              {links.repo && (
-                <a class="text-accent hover:underline" href={links.repo}>
-                  Source
-                </a>
-              )}
-            </dd>
-          </div>
-        )
-      }
+    <dl class="mt-8 grid grid-cols-2 gap-[3px] border-[3px] border-fg bg-fg text-sm sm:grid-cols-4">
+      <div class="bg-bg p-4"><dt class="label">Role</dt><dd class="mt-1 font-semibold">{role}</dd></div>
+      <div class="bg-bg p-4"><dt class="label">Year</dt><dd class="mt-1 font-semibold">{year}</dd></div>
+      <div class="bg-bg p-4">
+        <dt class="label">Status</dt>
+        <dd class="mt-1 flex items-center gap-2 font-semibold">
+          {status === 'live' && <span class="live-dot" aria-hidden="true" />}
+          {statusLabel}
+        </dd>
+      </div>
+      <div class="bg-bg p-4">
+        <dt class="label">Links</dt>
+        <dd class="mt-1 flex flex-col gap-1 font-semibold">
+          {
+            links.live && (
+              <a class="underline decoration-accent decoration-2 underline-offset-2" href={links.live}>
+                {new URL(links.live).host}
+              </a>
+            )
+          }
+          {
+            links.repo && (
+              <a class="underline decoration-accent decoration-2 underline-offset-2" href={links.repo}>
+                Source
+              </a>
+            )
+          }
+          {!links.live && !links.repo && <span class="text-muted">Private</span>}
+        </dd>
+      </div>
     </dl>
 
-    <Image
-      src={cover}
-      alt={coverAlt}
-      loading="eager"
-      class="mt-10 aspect-[16/9] w-full rounded-xl border border-border object-cover"
-    />
+    <Image src={cover} alt={coverAlt} loading="eager" class="mt-8 aspect-[16/9] w-full border-[3px] border-fg object-cover" />
 
     <div class="prose mt-4">
       <Content />
@@ -70,17 +79,17 @@ const statusLabel = { live: 'Live', archived: 'Archived', wip: 'In progress' }[s
       </div>
     </div>
 
-    <aside
-      class="mt-16 flex flex-col gap-6 rounded-2xl border border-border bg-surface p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8"
-      aria-label="Next steps"
-    >
-      <div>
-        <p class="font-semibold">Need something like this built?</p>
-        <p class="mt-1 text-sm text-muted">
-          Next case study: <a class="text-accent underline underline-offset-2" href={`/work/${next.data.slug}/`}>{next.data.title}</a>
-        </p>
+    <aside class="mt-20 grid gap-[3px] border-[3px] border-fg bg-fg sm:grid-cols-2" aria-label="Next steps">
+      <a href={`/work/${next.data.slug}/`} class="group bg-bg p-6 hover:bg-surface">
+        <span class="label">Next case study</span>
+        <span class="display mt-2 block text-3xl group-hover:underline decoration-accent decoration-[3px] underline-offset-4">
+          {next.data.title} &rarr;
+        </span>
+      </a>
+      <div class="flex flex-col items-start justify-between gap-4 bg-accent p-6 text-accent-fg">
+        <p class="display text-3xl">Need something like this built?</p>
+        <CTA href="/contact/" variant="ink">Work with me</CTA>
       </div>
-      <CTA href="/contact/">Work with me</CTA>
     </aside>
   </article>
 </Base>
