@@ -12,7 +12,7 @@ const { href, variant = 'primary' } = Astro.props;
   class:list={[
     'inline-flex min-h-12 items-center justify-center gap-2 border-[3px] px-5 text-sm font-extrabold tracking-wide uppercase transition-colors',
     {
-      primary: 'border-accent bg-accent text-accent-fg hover:border-fg hover:bg-fg hover:text-bg',
+      primary: 'border-accent bg-accent text-accent-fg hover:underline hover:decoration-[3px] hover:underline-offset-4',
       secondary: 'border-fg text-fg hover:bg-fg hover:text-bg',
       ink: 'border-accent-fg text-accent-fg hover:bg-accent-fg hover:text-accent',
     }[variant],
