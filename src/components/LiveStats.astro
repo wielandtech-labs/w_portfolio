@@ -1,14 +1,15 @@
 ---
 import StatTile from './StatTile.astro';
 
-// The home page hero: the headline (slot) beside the live pod count, over a
+// The home page hero: the headline (slot) beside 30-day availability, over a
 // ruled grid of the other cluster numbers. The page leads with proof.
+// Data: w_tech's /api/metrics/ (Prometheus); see AGENTS.md "Live stats".
 const tiles = [
   { stat: 'deployments', label: 'Deployments healthy' },
-  { stat: 'nodes', label: 'Nodes up' },
-  { stat: 'cpu', label: 'CPU' },
-  { stat: 'memory', label: 'Memory' },
-  { stat: 'uptime', label: 'Uptime' },
+  { stat: 'pods', label: 'Pods running' },
+  { stat: 'nodes', label: 'Nodes ready' },
+  { stat: 'traffic', label: 'Requests / sec' },
+  { stat: 'database', label: 'Postgres data' },
 ];
 ---
 
@@ -22,9 +23,10 @@ const tiles = [
         <dt class="font-mono text-xs font-bold tracking-widest uppercase">Live from the homelab</dt>
         <dd class="mt-1 text-sm font-semibold">The cluster this site runs on, right now.</dd>
       </div>
-      <div class="flex flex-col-reverse">
-        <dt class="font-mono text-xs font-bold tracking-widest uppercase">Pods running</dt>
-        <dd class="display text-7xl tabular-nums sm:text-8xl" data-stat="pods">&mdash;</dd>
+      <div>
+        <dt class="font-mono text-xs font-bold tracking-widest uppercase">Availability · 30 days</dt>
+        <dd class="display mt-1 text-6xl tabular-nums sm:text-7xl" data-stat="availability">&mdash;</dd>
+        <dd class="mt-1 h-5 text-sm font-semibold" data-stat-detail="availability"></dd>
       </div>
     </dl>
   </div>
@@ -43,13 +45,12 @@ const tiles = [
   // Polls the homelab metrics (same-origin; nginx proxies to w_tech) and
   // fills the StatTiles. Failure leaves the layout intact with a message.
   type Metrics = {
-    cpu?: { percentage: number; total_cores: number };
-    memory?: { percentage: number; used_gb: number; total_gb: number };
-    pods?: { count: number };
-    uptime?: { formatted: string };
-    deployments?: { total: number; healthy: number };
-    nodes_count?: number;
-    reachable_nodes?: number;
+    availability?: { percentage: number; services: number } | null;
+    deployments?: { total: number; healthy: number } | null;
+    pods?: { count: number } | null;
+    nodes?: { count: number; ready?: number | null } | null;
+    traffic?: { requests_per_second: number } | null;
+    database?: { size_mb: number; databases: number } | null;
   };
 
   const POLL_MS = 30_000;
@@ -94,18 +95,24 @@ const tiles = [
     };
 
     const int = (x: number) => Math.round(x).toString();
-    const pct = (x: number) => `${Math.round(x)}%`;
+    const oneDp = (x: number) => x.toFixed(1);
+    // w_tech already caps an imperfect month below 100 (99.996 -> 99.99).
+    const availability = (x: number) => `${x.toFixed(2)}%`;
+    const size = (mb: number) => (mb >= 1000 ? `${(mb / 1000).toFixed(1)} GB` : `${Math.round(mb)} MB`);
 
     const render = (m: Metrics) => {
-      if (m.pods) setNumber('pods', m.pods.count, int);
+      // A card is null when its query failed; never leave its old number up.
+      tiles.forEach((t) => setText(t, '—'));
+      // A count-up from 0% would flash "failing" numbers, so this one is static.
+      if (m.availability)
+        setText('availability', availability(m.availability.percentage), `across ${m.availability.services} monitored services`);
       if (m.deployments)
         setNumber('deployments', m.deployments.healthy, int, `of ${m.deployments.total}`);
-      if (m.cpu) setNumber('cpu', m.cpu.percentage, pct, `${m.cpu.total_cores} cores`);
-      if (m.memory)
-        setNumber('memory', m.memory.percentage, pct, `${m.memory.used_gb.toFixed(0)} / ${m.memory.total_gb.toFixed(0)} GB`);
-      if (m.nodes_count !== undefined)
-        setNumber('nodes', m.reachable_nodes ?? 0, int, `of ${m.nodes_count}`);
-      if (m.uptime) setText('uptime', m.uptime.formatted);
+      if (m.pods) setNumber('pods', m.pods.count, int);
+      if (m.nodes && typeof m.nodes.ready === 'number')
+        setNumber('nodes', m.nodes.ready, int, `of ${m.nodes.count}`);
+      if (m.traffic) setNumber('traffic', m.traffic.requests_per_second, oneDp, 'ingress, 5 min avg');
+      if (m.database) setText('database', size(m.database.size_mb), `${m.database.databases} databases`);
       first = false;
     };
 

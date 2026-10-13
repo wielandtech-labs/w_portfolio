@@ -94,6 +94,15 @@ the data is public and read-only. In `npm run dev`, Vite proxies it to
 every 30 s, pauses while the tab is hidden, and degrades to "Live stats
 unavailable" without layout shift.
 
+w_tech owns the endpoint (Prometheus-backed) and pins the fields this site
+reads in a contract test (`ClusterMetricsViewTests.test_w_portfolio_contract`):
+`availability.{percentage,services}`, `deployments.{healthy,total}`,
+`pods.count`, `nodes.{count,ready}`, `traffic.requests_per_second`,
+`database.{size_mb,databases}`. A card is `null` when its query failed. When
+you read a new field, add it to that test in w_tech. Because every
+environment reads prod w_tech, a new field must be live there before this
+site's review app can show it.
+
 ## Content
 
 Case studies are `src/content/work/*.mdx` (schema in
