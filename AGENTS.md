@@ -96,7 +96,7 @@ unavailable" without layout shift.
 
 w_tech owns the endpoint (Prometheus-backed) and pins the fields this site
 reads in a contract test (`ClusterMetricsViewTests.test_w_portfolio_contract`):
-`availability.{percentage,services}`, `deployments.{healthy,total}`,
+`availability.{percentage,services,slo_met,state}`, `deployments.{healthy,total}`,
 `pods.count`, `nodes.{count,ready}`, `traffic.requests_per_second`,
 `database.{size_mb,databases}`. A card is `null` when its query failed. When
 you read a new field, add it to that test in w_tech. Because every
