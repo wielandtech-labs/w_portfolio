@@ -48,8 +48,8 @@ const tiles = [
     availability?: {
       percentage: number;
       services: number;
-      slo_met: number | null;
-      state: 'healthy' | 'at_risk' | 'breached';
+      slo_met?: number | null;
+      state?: 'healthy' | 'at_risk' | 'breached';
     } | null;
     deployments?: { total: number; healthy: number } | null;
     pods?: { count: number } | null;
@@ -121,9 +121,11 @@ const tiles = [
       const a = m.availability;
       setPanel(a?.state);
       if (a) {
-        const slo = a.slo_met === null ? 'Below the 99% SLO' : `Meets the ${a.slo_met}% SLO`;
-        setText('availability', availability(a.percentage), `${slo}
-across ${a.services} monitored services`);
+        const services = `across ${a.services} monitored services`;
+        // slo_met is absent (not null) from a w_tech that predates the SLO tiers
+        const slo =
+          a.slo_met === undefined ? '' : a.slo_met === null ? 'Below the 99% SLO\n' : `Meets the ${a.slo_met}% SLO\n`;
+        setText('availability', availability(a.percentage), slo + services);
       }
       if (m.deployments)
         setNumber('deployments', m.deployments.healthy, int, `of ${m.deployments.total}`);
