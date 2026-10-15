@@ -2,13 +2,17 @@
 import StatTile from './StatTile.astro';
 
 // The home page hero: the headline (slot) beside 30-day availability, over a
-// ruled grid of the other cluster numbers. The page leads with proof.
+// ruled grid of the other cluster numbers: the four golden signals, then the
+// platform. The page leads with proof.
 // Data: w_tech's /api/metrics/ (Prometheus); see AGENTS.md "Live stats".
 const tiles = [
+  { stat: 'latency', label: 'Latency · p99' },
+  { stat: 'traffic', label: 'Requests / sec' },
+  { stat: 'error_rate', label: 'Errors · 5xx' },
+  { stat: 'cpu', label: 'Saturation · CPU' },
   { stat: 'deployments', label: 'Deployments healthy' },
   { stat: 'pods', label: 'Pods running' },
   { stat: 'nodes', label: 'Nodes ready' },
-  { stat: 'traffic', label: 'Requests / sec' },
   { stat: 'database', label: 'Postgres data' },
 ];
 ---
@@ -30,7 +34,7 @@ const tiles = [
       </div>
     </dl>
   </div>
-  <dl class="grid grid-cols-2 gap-[3px] border-x-[3px] border-b-[3px] border-fg bg-fg lg:grid-cols-5 [&>*:last-child]:col-span-2 lg:[&>*:last-child]:col-span-1">
+  <dl class="grid grid-cols-2 gap-[3px] border-x-[3px] border-b-[3px] border-fg bg-fg lg:grid-cols-4">
     {tiles.map((t) => <StatTile {...t} />)}
   </dl>
   <p class="mt-3 flex flex-wrap items-center gap-x-2 font-mono text-xs text-muted">
@@ -55,6 +59,10 @@ const tiles = [
     pods?: { count: number } | null;
     nodes?: { count: number; ready?: number | null } | null;
     traffic?: { requests_per_second: number } | null;
+    latency?: { p99_ms: number } | null;
+    error_rate?: { percentage: number } | null;
+    cpu?: { percentage: number } | null;
+    memory?: { percentage: number } | null;
     database?: { size_mb: number; databases: number } | null;
   };
 
@@ -104,6 +112,7 @@ const tiles = [
     const oneDp = (x: number) => x.toFixed(1);
     // w_tech floors to 2 decimals, so an imperfect month never reads as 100.00%.
     const availability = (x: number) => `${x.toFixed(2)}%`;
+    const duration = (ms: number) => (ms >= 1000 ? `${ms / 1000} s` : `${ms} ms`);
     const size = (mb: number) => (mb >= 1000 ? `${(mb / 1000).toFixed(1)} GB` : `${Math.round(mb)} MB`);
 
     // The availability panel takes its color from the SLO tier met (99.9% /
@@ -132,7 +141,12 @@ const tiles = [
       if (m.pods) setNumber('pods', m.pods.count, int);
       if (m.nodes && typeof m.nodes.ready === 'number')
         setNumber('nodes', m.nodes.ready, int, `of ${m.nodes.count}`);
+      // p99_ms is the Traefik histogram bucket bound the p99 falls under
+      if (m.latency) setText('latency', `≤ ${duration(m.latency.p99_ms)}`, 'ingress, 5 min');
       if (m.traffic) setNumber('traffic', m.traffic.requests_per_second, oneDp, 'ingress, 5 min avg');
+      if (m.error_rate) setText('error_rate', `${m.error_rate.percentage.toFixed(2)}%`, 'of requests, 5 min');
+      if (m.cpu)
+        setNumber('cpu', m.cpu.percentage, (x) => `${int(x)}%`, m.memory ? `memory ${int(m.memory.percentage)}%` : '');
       if (m.database) setText('database', size(m.database.size_mb), `${m.database.databases} databases`);
       first = false;
     };
