@@ -99,9 +99,9 @@ reads in a contract test (`ClusterMetricsViewTests.test_w_portfolio_contract`):
 `availability.{percentage,services,slo_met,state,daily}`, `deployments.{healthy,total}`,
 `pods.count`, `nodes.{count,ready}`, `traffic.requests_per_second`,
 `latency.p99_ms`, `error_rate.percentage`, `cpu.percentage`,
-`memory.percentage`, `database.{size_mb,databases}`. `latency.p99_ms` is a
-Traefik bucket bound (default buckets 100/300/1200/5000 ms), so it shows as
-"≤ 100 ms", never as a precise number. `availability.daily` (30 rolling 24h
+`memory.percentage`, `database.{size_mb,databases}`. `latency.p99_ms` is the
+interpolated p99 over Traefik's 25 ms–5 s buckets (set in w_homelab), and
+`null` past 5 s. `availability.daily` (30 rolling 24h
 values, oldest first) draws the SLO graph; while it's missing the graph shows
 an empty frame. A card is `null` when its query failed. When
 you read a new field, add it to that test in w_tech. Because every
