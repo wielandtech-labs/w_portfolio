@@ -2,14 +2,17 @@
 import StatTile from './StatTile.astro';
 
 // The home page hero: the headline (slot) beside 30-day availability, over a
-// ruled grid of the other cluster numbers: the four golden signals, then the
-// platform. The page leads with proof.
+// ruled grid of the other cluster numbers: the four golden signals in a row,
+// availability per day across the 30-day SLO window, then the platform. The
+// page leads with proof.
 // Data: w_tech's /api/metrics/ (Prometheus); see AGENTS.md "Live stats".
-const tiles = [
+const signals = [
   { stat: 'latency', label: 'Latency · p99' },
   { stat: 'traffic', label: 'Requests / sec' },
   { stat: 'error_rate', label: 'Errors · 5xx' },
   { stat: 'cpu', label: 'Saturation · CPU' },
+];
+const platform = [
   { stat: 'deployments', label: 'Deployments healthy' },
   { stat: 'pods', label: 'Pods running' },
   { stat: 'nodes', label: 'Nodes ready' },
@@ -34,8 +37,31 @@ const tiles = [
       </div>
     </dl>
   </div>
-  <dl class="grid grid-cols-2 gap-[3px] border-x-[3px] border-b-[3px] border-fg bg-fg lg:grid-cols-4">
-    {tiles.map((t) => <StatTile {...t} />)}
+  <dl class="grid grid-cols-2 gap-[3px] border-x-[3px] border-b-[3px] border-fg bg-fg sm:grid-cols-4">
+    {signals.map((t) => <StatTile {...t} />)}
+  </dl>
+  <figure class="border-x-[3px] border-b-[3px] border-fg bg-bg p-4">
+    <figcaption class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+      <span class="label">Availability · per day, 30-day SLO window</span>
+      <span class="font-mono text-xs text-muted" data-slo-graph-summary>&mdash;</span>
+    </figcaption>
+    <div class="relative mt-3 h-24 pr-20 sm:h-28">
+      <!-- Fixed 99–100% scale: 30 one-day bars, the 99.9% SLO as a dashed rule
+           10% from the top. A day below 99% keeps a stub so it stays visible. -->
+      <svg data-slo-graph viewBox="0 0 300 100" preserveAspectRatio="none" class="size-full" role="img" aria-label="Daily availability: no data">
+        <g data-slo-bars></g>
+        <line x1="0" x2="300" y1="10" y2="10" class="stroke-fg" stroke-width="1.5" stroke-dasharray="6 4" vector-effect="non-scaling-stroke" />
+      </svg>
+      <span class="absolute top-0 right-0 font-mono text-xs leading-none text-muted" aria-hidden="true">100%</span>
+      <span class="absolute top-[10%] right-0 translate-y-1 font-mono text-xs leading-none font-bold" aria-hidden="true">99.9% SLO</span>
+      <span class="absolute right-0 bottom-0 font-mono text-xs leading-none text-muted" aria-hidden="true">99%</span>
+    </div>
+    <div class="mt-1 flex justify-between pr-20 font-mono text-xs text-muted" aria-hidden="true">
+      <span>30 days ago</span><span>today</span>
+    </div>
+  </figure>
+  <dl class="grid grid-cols-2 gap-[3px] border-x-[3px] border-b-[3px] border-fg bg-fg sm:grid-cols-4">
+    {platform.map((t) => <StatTile {...t} />)}
   </dl>
   <p class="mt-3 flex flex-wrap items-center gap-x-2 font-mono text-xs text-muted">
     <span class="inline-block size-2 bg-border" data-stats-dot aria-hidden="true"></span>
@@ -54,6 +80,8 @@ const tiles = [
       services: number;
       slo_met?: number | null;
       state?: 'healthy' | 'at_risk' | 'breached';
+      // rolling 24h availability, oldest first; absent from an older w_tech
+      daily?: number[] | null;
     } | null;
     deployments?: { total: number; healthy: number } | null;
     pods?: { count: number } | null;
@@ -123,12 +151,49 @@ const tiles = [
       sloPanel.classList.add(...(state ? [panelFill[state], 'text-accent-fg'] : ['bg-surface', 'text-fg']));
     };
 
+    // One bar per day on the graph's fixed 99–100% scale (viewBox 300x100),
+    // right-aligned so today is always the last slot, colored by SLO tier.
+    const graph = root.querySelector<SVGSVGElement>('[data-slo-graph]')!;
+    const bars = graph.querySelector<SVGGElement>('[data-slo-bars]')!;
+    const graphSummary = root.querySelector<HTMLElement>('[data-slo-graph-summary]')!;
+    const DAYS = 30;
+    const setGraph = (daily?: number[] | null) => {
+      bars.replaceChildren();
+      if (!daily?.length) {
+        graph.setAttribute('aria-label', 'Daily availability: no data');
+        graphSummary.textContent = '—';
+        return;
+      }
+      const days = daily.slice(-DAYS);
+      const offset = DAYS - days.length;
+      days.forEach((v, i) => {
+        const h = Math.max(3, Math.min(100, (v - 99) * 100));
+        const bar = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        bar.setAttribute('x', String((offset + i) * 10 + 1));
+        bar.setAttribute('y', String(100 - h));
+        bar.setAttribute('width', '8');
+        bar.setAttribute('height', String(h));
+        bar.setAttribute('class', v >= 99.9 ? 'fill-ok' : v >= 99 ? 'fill-warn' : 'fill-bad');
+        const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+        title.textContent = `${days.length - 1 - i === 0 ? 'Last 24 h' : `${days.length - 1 - i} days ago`}: ${availability(v)}`;
+        bar.append(title);
+        bars.append(bar);
+      });
+      const perfect = days.filter((v) => v >= 100).length;
+      const met = days.filter((v) => v >= 99.9).length;
+      const low = availability(Math.min(...days));
+      const summary = `${perfect} of ${days.length} days at 100% · lowest ${low}`;
+      graphSummary.textContent = summary;
+      graph.setAttribute('aria-label', `Daily availability, last ${days.length} days: ${met} met the 99.9% SLO; ${summary}.`);
+    };
+
     const render = (m: Metrics) => {
       // A card is null when its query failed; never leave its old number up.
       tiles.forEach((t) => setText(t, '—'));
       // A count-up from 0% would flash "failing" numbers, so this one is static.
       const a = m.availability;
       setPanel(a?.state);
+      setGraph(a?.daily);
       if (a) {
         const services = `across ${a.services} monitored services`;
         // slo_met is absent (not null) from a w_tech that predates the SLO tiers
@@ -165,6 +230,7 @@ const tiles = [
       if (!ok) {
         tiles.forEach((t) => setText(t, '—'));
         setPanel();
+        setGraph();
       }
     };
 

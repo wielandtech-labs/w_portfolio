@@ -27,8 +27,9 @@
    text uses --accent-text, which passes AA on the page background.
    Light by default, dark from the OS preference, and an explicit choice
    (data-theme on <html>, set by /theme.js) overrides both.
-   Status fills (--ok/--warn/--bad) color the live availability panel only,
-   by SLO tier met; like the signal fill they carry dark text, in both themes. */
+   Status fills (--ok/--warn/--bad) color the live availability panel and the
+   daily availability bars only, by SLO tier met; like the signal fill they
+   carry dark text, in both themes. */
 :root {
   --ok: #2fbf71;
   --warn: #f5b700;
