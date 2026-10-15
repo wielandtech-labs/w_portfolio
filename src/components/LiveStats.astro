@@ -140,7 +140,7 @@ const platform = [
     const oneDp = (x: number) => x.toFixed(1);
     // w_tech floors to 2 decimals, so an imperfect month never reads as 100.00%.
     const availability = (x: number) => `${x.toFixed(2)}%`;
-    const duration = (ms: number) => (ms >= 1000 ? `${ms / 1000} s` : `${ms} ms`);
+    const duration = (ms: number) => (ms >= 1000 ? `${(ms / 1000).toFixed(2)} s` : `${ms} ms`);
     const size = (mb: number) => (mb >= 1000 ? `${(mb / 1000).toFixed(1)} GB` : `${Math.round(mb)} MB`);
 
     // The availability panel takes its color from the SLO tier met (99.9% /
@@ -206,8 +206,8 @@ const platform = [
       if (m.pods) setNumber('pods', m.pods.count, int);
       if (m.nodes && typeof m.nodes.ready === 'number')
         setNumber('nodes', m.nodes.ready, int, `of ${m.nodes.count}`);
-      // p99_ms is the Traefik histogram bucket bound the p99 falls under
-      if (m.latency) setText('latency', `≤ ${duration(m.latency.p99_ms)}`, 'ingress, 5 min');
+      // p99_ms is interpolated within Traefik's histogram buckets
+      if (m.latency) setText('latency', duration(m.latency.p99_ms), 'ingress, 5 min');
       if (m.traffic) setNumber('traffic', m.traffic.requests_per_second, oneDp, 'ingress, 5 min avg');
       if (m.error_rate) setText('error_rate', `${m.error_rate.percentage.toFixed(2)}%`, 'of requests, 5 min');
       if (m.cpu)
