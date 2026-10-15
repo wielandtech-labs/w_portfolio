@@ -26,8 +26,13 @@
    (#ff4d00) only carries dark text or large numbers; small signal-colored
    text uses --accent-text, which passes AA on the page background.
    Light by default, dark from the OS preference, and an explicit choice
-   (data-theme on <html>, set by /theme.js) overrides both. */
+   (data-theme on <html>, set by /theme.js) overrides both.
+   Status fills (--ok/--warn/--bad) color the live availability panel only,
+   by SLO tier met; like the signal fill they carry dark text, in both themes. */
 :root {
+  --ok: #2fbf71;
+  --warn: #f5b700;
+  --bad: #f2555a;
   --bg: #ffffff;
   --surface: #f3f3f0;
   --fg: #0a0a0a;
@@ -74,6 +79,9 @@
   --color-accent: var(--accent);
   --color-accent-fg: var(--accent-fg);
   --color-accent-text: var(--accent-text);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --color-bad: var(--bad);
   --font-sans: 'Inter Tight Variable', 'Inter Tight Fallback', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono Fallback', ui-monospace, SFMono-Regular, Menlo, monospace;
 }

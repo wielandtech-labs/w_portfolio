@@ -18,7 +18,7 @@ const tiles = [
     <div class="p-5 sm:p-8 lg:col-span-2">
       <slot />
     </div>
-    <dl class="flex flex-col justify-between gap-6 border-t-[3px] border-fg bg-accent p-5 text-accent-fg sm:p-8 lg:border-t-0 lg:border-l-[3px]">
+    <dl data-slo-panel class="flex flex-col justify-between gap-6 border-t-[3px] border-fg bg-surface p-5 text-fg sm:p-8 lg:border-t-0 lg:border-l-[3px]">
       <div>
         <dt class="font-mono text-xs font-bold tracking-widest uppercase">Live from the homelab</dt>
         <dd class="mt-1 text-sm font-semibold">The cluster this site runs on, right now.</dd>
@@ -26,7 +26,7 @@ const tiles = [
       <div>
         <dt class="font-mono text-xs font-bold tracking-widest uppercase">Availability · 30 days</dt>
         <dd class="display mt-1 text-6xl tabular-nums sm:text-7xl" data-stat="availability">&mdash;</dd>
-        <dd class="mt-1 h-5 text-sm font-semibold" data-stat-detail="availability"></dd>
+        <dd class="mt-1 h-10 text-sm font-semibold whitespace-pre-line" data-stat-detail="availability"></dd>
       </div>
     </dl>
   </div>
@@ -45,7 +45,12 @@ const tiles = [
   // Polls the homelab metrics (same-origin; nginx proxies to w_tech) and
   // fills the StatTiles. Failure leaves the layout intact with a message.
   type Metrics = {
-    availability?: { percentage: number; services: number } | null;
+    availability?: {
+      percentage: number;
+      services: number;
+      slo_met?: number | null;
+      state?: 'healthy' | 'at_risk' | 'breached';
+    } | null;
     deployments?: { total: number; healthy: number } | null;
     pods?: { count: number } | null;
     nodes?: { count: number; ready?: number | null } | null;
@@ -62,6 +67,7 @@ const tiles = [
     const status = root.querySelector<HTMLElement>('[data-stats-status]')!;
     const dot = root.querySelector<HTMLElement>('[data-stats-dot]')!;
     const updated = root.querySelector<HTMLElement>('[data-stats-updated]')!;
+    const sloPanel = root.querySelector<HTMLElement>('[data-slo-panel]')!;
     const tiles = [...root.querySelectorAll<HTMLElement>('[data-stat]')].map((el) => el.dataset.stat!);
     const value = (k: string) => root.querySelector<HTMLElement>(`[data-stat="${k}"]`);
     const detail = (k: string) => root.querySelector<HTMLElement>(`[data-stat-detail="${k}"]`);
@@ -96,16 +102,31 @@ const tiles = [
 
     const int = (x: number) => Math.round(x).toString();
     const oneDp = (x: number) => x.toFixed(1);
-    // w_tech already caps an imperfect month below 100 (99.996 -> 99.99).
+    // w_tech floors to 2 decimals, so an imperfect month never reads as 100.00%.
     const availability = (x: number) => `${x.toFixed(2)}%`;
     const size = (mb: number) => (mb >= 1000 ? `${(mb / 1000).toFixed(1)} GB` : `${Math.round(mb)} MB`);
+
+    // The availability panel takes its color from the SLO tier met (99.9% /
+    // 99% / below), and stays neutral when there's no data.
+    const panelFill = { healthy: 'bg-ok', at_risk: 'bg-warn', breached: 'bg-bad' } as const;
+    const setPanel = (state?: keyof typeof panelFill) => {
+      sloPanel.classList.remove('bg-surface', 'text-fg', 'text-accent-fg', ...Object.values(panelFill));
+      sloPanel.classList.add(...(state ? [panelFill[state], 'text-accent-fg'] : ['bg-surface', 'text-fg']));
+    };
 
     const render = (m: Metrics) => {
       // A card is null when its query failed; never leave its old number up.
       tiles.forEach((t) => setText(t, '—'));
       // A count-up from 0% would flash "failing" numbers, so this one is static.
-      if (m.availability)
-        setText('availability', availability(m.availability.percentage), `across ${m.availability.services} monitored services`);
+      const a = m.availability;
+      setPanel(a?.state);
+      if (a) {
+        const services = `across ${a.services} monitored services`;
+        // slo_met is absent (not null) from a w_tech that predates the SLO tiers
+        const slo =
+          a.slo_met === undefined ? '' : a.slo_met === null ? 'Below the 99% SLO\n' : `Meets the ${a.slo_met}% SLO\n`;
+        setText('availability', availability(a.percentage), slo + services);
+      }
       if (m.deployments)
         setNumber('deployments', m.deployments.healthy, int, `of ${m.deployments.total}`);
       if (m.pods) setNumber('pods', m.pods.count, int);
@@ -127,7 +148,10 @@ const tiles = [
         ? `· updated ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
         : '';
       // Never leave old numbers on screen looking live.
-      if (!ok) tiles.forEach((t) => setText(t, '—'));
+      if (!ok) {
+        tiles.forEach((t) => setText(t, '—'));
+        setPanel();
+      }
     };
 
     const load = async () => {
