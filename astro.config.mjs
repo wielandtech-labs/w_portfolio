@@ -7,7 +7,11 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
   site: 'https://wielandtech.com',
   trailingSlash: 'always',
-  integrations: [mdx(), sitemap()],
+  integrations: [
+    mdx(),
+    // Plain sitemap: no news/image/video/xhtml extensions, which this site doesn't use.
+    sitemap({ namespaces: { news: false, xhtml: false, image: false, video: false } }),
+  ],
   build: {
     // nginx sends a strict CSP (style-src 'self'), so nothing may be inlined.
     inlineStylesheets: 'never',
