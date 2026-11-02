@@ -5,6 +5,7 @@ import Base from '../../layouts/Base.astro';
 import Tag from '../../components/Tag.astro';
 import CTA from '../../components/CTA.astro';
 import { getWork } from '../../lib/work';
+import { breadcrumbs, graph, organization, person } from '../../lib/schema';
 
 export async function getStaticPaths() {
   const work = await getWork();
@@ -19,9 +20,31 @@ const { title, tagline, year, status, role, stack, links, cover, coverAlt, slug,
 const { Content } = await render(entry);
 const statusLabel = { live: 'Live', archived: 'Archived', wip: 'In progress' }[status];
 const num = String(index + 1).padStart(2, '0');
+const pageUrl = `https://wielandtech.com/work/${slug}/`;
+const jsonLd = graph(
+  {
+    '@type': 'CreativeWork',
+    '@id': `${pageUrl}#work`,
+    name: title,
+    headline: title,
+    description: tagline,
+    url: pageUrl,
+    image: `https://wielandtech.com/og/${slug}.png`,
+    dateCreated: year,
+    creator: { '@id': person['@id'] },
+    publisher: { '@id': organization['@id'] },
+    keywords: stack.join(', '),
+    ...(links.live ? { about: { '@type': 'WebSite', url: links.live } } : {}),
+  },
+  breadcrumbs([
+    { name: 'Home', path: '/' },
+    { name: 'Work', path: '/work/' },
+    { name: title, path: `/work/${slug}/` },
+  ]),
+);
 ---
 
-<Base title={title} description={tagline} ogImage={`/og/${slug}.png`} ogType="article">
+<Base title={title} description={tagline} ogImage={`/og/${slug}.png`} ogType="article" jsonLd={jsonLd}>
   <article class="mx-auto max-w-6xl px-4 pt-10 sm:px-6">
     <p class="label"><a href="/work/" class="hover:text-fg">&larr; All work</a> <span aria-hidden="true">/</span> {num}</p>
     <header class="mt-6 grid gap-6 border-t-[3px] border-fg pt-6 lg:grid-cols-3">
