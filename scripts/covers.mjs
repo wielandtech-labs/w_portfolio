@@ -102,6 +102,25 @@ function domains() {
   return s;
 }
 
+function cameras() {
+  // Own PRNG, so adding this cover doesn't shift the shared sequence above.
+  let s2 = 42;
+  const r = () => ((s2 = (s2 * 16807) % 2147483647) / 2147483647);
+  const hubs = [[1000, 250, 150], [1320, 420, 120], [1140, 560, 90], [820, 470, 70]];
+  let s = '';
+  for (const [hx, hy, rad] of hubs)
+    for (let i = 0; i < 70; i++) {
+      const a = r() * Math.PI * 2, d = Math.sqrt(r()) * rad;
+      const x = Math.round(hx + Math.cos(a) * d), y = Math.round(hy + Math.sin(a) * d * 0.7);
+      s += `<circle cx="${x}" cy="${y}" r="5" fill="${A2}" fill-opacity="0.55"/>`;
+    }
+  // A few cameras with their view cones, like the map at street zoom.
+  const cones = [[1000, 250, 40], [1320, 420, 200], [1140, 560, 300]];
+  for (const [x, y, deg] of cones)
+    s += `<path d="M${x} ${y} L${x - 48} ${y - 120} A130 130 0 0 1 ${x + 48} ${y - 120} Z" transform="rotate(${deg} ${x} ${y})" fill="${A}" fill-opacity="0.35"/><circle cx="${x}" cy="${y}" r="13" fill="${A}"/>`;
+  return s;
+}
+
 const covers = {
   'warn-index': frame('WARN Index', 'LAYOFF NOTICES · 48 JURISDICTIONS', bars()),
   r12d: frame('r12d', 'QR STICKERS · SHORT LINKS · INVENTORY', qr(900, 110, 25, 22, 0.5)),
@@ -110,6 +129,7 @@ const covers = {
   'w-tech': frame('One app, two domains', 'DJANGO · CI-GATED DEPLOYS', domains()),
   // Site-wide Open Graph image (not a case study).
   default: frame('WielandTech', 'PRODUCTION SYSTEMS, END TO END', bars()),
+  fluck: frame('Fluck', 'FLOCK CAMERA MAP · 336K DEVICES', cameras()),
 };
 
 for (const [name, svg] of Object.entries(covers)) writeFileSync(join(out, `${name}.svg`), svg);

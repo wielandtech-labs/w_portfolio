@@ -1,0 +1,74 @@
+---
+title: Fluck
+slug: fluck
+tagline: A map of 336,000 Flock Safety surveillance devices and license plate readers that doesn't track the people looking at it.
+year: '2026'
+status: live
+role: 'Sole developer: data, build, ops'
+stack: [MapLibre, PMTiles, tippecanoe, nginx, OpenStreetMap, Kubernetes, Flux]
+links:
+  live: https://fluck.r12d.ch
+cover: ../../assets/covers/fluck.svg
+coverAlt: Clusters of camera dots on a dark map, three with orange view cones.
+metric:
+  value: '0'
+  label: third-party requests
+order: 2
+---
+
+import Flow from '../../components/Flow.astro';
+
+## Problem
+
+Flock Safety license plate readers log every car that drives past them, and police can search
+those sightings across agencies, usually without a warrant. People reasonably want to know
+where the cameras are. The data exists in two places: a 335,000-row inventory a security
+researcher archived after a Flock site exposed an access token, and roughly 117,000 cameras
+volunteers have tagged in OpenStreetMap. A map built on that data has its own problem: a page
+about surveillance can't load a map provider's tiles, an analytics script or a font CDN
+without logging its own visitors to third parties.
+
+## Approach
+
+A static site where every byte comes from one origin, built from data that never touches git:
+
+<Flow
+  caption="Data is built once (inventory) or nightly (OSM) in CI, stored in object storage, and served read-only through the site's own nginx."
+  steps={[
+    { label: 'Inventory + OSM', detail: 'TSV snapshot, nightly Overpass query' },
+    { label: 'Trim + tile', detail: 'drop names and IDs, tippecanoe → PMTiles' },
+    { label: 'Object storage', detail: 'anonymous read on two prefixes only' },
+    { label: 'Same-origin nginx', detail: 'range requests, strict CSP, no logs', highlight: true },
+  ]}
+/>
+
+- **Self-hosted everything.** The basemap is a 9.7 GB US extract of Protomaps in a single
+  PMTiles file, read with HTTP range requests. MapLibre, fonts, sprites and a ZIP-code lookup
+  are vendored at pinned, checksum-verified versions. The CSP is `default-src 'none'` plus
+  `'self'` where needed, so a stray third-party request would simply fail.
+- **Publish less than you have.** The inventory's device names often contain street addresses,
+  which can identify a private customer. The trim step keeps only location, type, status,
+  capabilities and direction, and drops every name and internal ID before anything is public.
+- **Data stays out of the code path.** The repo, the container image and the registry cache
+  hold no data. CI builds tiles inside the remote BuildKit and exports them straight to object
+  storage, so a takedown of the code can't take the data with it, and vice versa.
+
+## Hard parts
+
+- **Honest counts.** At country zoom, tippecanoe thins dense areas to keep tiles small, so a
+  "cameras in view" counter would undercount. The counter only appears from city zoom up, where
+  every point is present, and it deduplicates features that straddle tile edges.
+- **A worker under a strict CSP.** MapLibre 6 ships as ES modules and spawns its worker from a
+  URL beside the main bundle. Serving it same-origin with `worker-src 'self' blob:` kept the
+  policy strict without `unsafe-eval` or inline scripts.
+- **Not a commercial product.** Flock's legal pressure on similar maps has used trademark
+  dilution claims, which a noncommercial site can defend against. Fluck runs on
+  [r12d](/work/r12d/), which went free and noncommercial for good alongside this launch.
+
+## Outcome
+
+- Live at **fluck.r12d.ch** with 335,689 inventory devices (214,062 in service) and about
+  117,000 OpenStreetMap reports, refreshed every night.
+- No cookies, no analytics, no access logs, and no third-party requests, verified by the CSP
+  rather than promised.
+- Ships through the same GitOps pipeline as the rest of the [homelab](/work/homelab/).

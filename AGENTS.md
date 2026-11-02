@@ -69,7 +69,10 @@ raphaelwieland.com (repo `w_tech`); link there, don't duplicate them.
 - **Strict CSP, no inline anything.** nginx sends `script-src 'self';
   style-src 'self'` (`nginx/security-headers.conf`). No inline `<script>`,
   `<style>` or `style=""` attributes, and no third-party origins. Theme code
-  is the external `public/theme.js`. `build.inlineStylesheets: 'never'` and
+  is the external `public/theme.js`. The one exception is JSON-LD
+  (`<script is:inline type="application/ld+json">` via the `jsonLd` prop on
+  `Base.astro`): it's a data block the browser never executes, so the CSP
+  doesn't apply to it. `build.inlineStylesheets: 'never'` and
   `assetsInlineLimit: 0` keep Astro from inlining. After a build,
   `grep -rn '<style\|style="\|<script>' dist/` must come back empty.
 - **No analytics or trackers** until self-hosted Umami exists, and then only

@@ -2,11 +2,27 @@
 import Base from '../../layouts/Base.astro';
 import WorkRow from '../../components/WorkRow.astro';
 import { getWork } from '../../lib/work';
+import { breadcrumbs, graph } from '../../lib/schema';
 
 const work = await getWork();
+const jsonLd = graph(
+  breadcrumbs([
+    { name: 'Home', path: '/' },
+    { name: 'Work', path: '/work/' },
+  ]),
+  {
+    '@type': 'ItemList',
+    itemListElement: work.map((entry, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      url: `https://wielandtech.com/work/${entry.data.slug}/`,
+      name: entry.data.title,
+    })),
+  },
+);
 ---
 
-<Base title="Work" description="Case studies: systems Raphael Wieland designed, built and runs in production.">
+<Base title="Work" description="Case studies: systems Raphael Wieland designed, built and runs in production." jsonLd={jsonLd}>
   <div class="mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-16">
     <p class="label">{String(work.length).padStart(2, '0')} case studies · all running in production</p>
     <h1 class="display mt-3 text-6xl sm:text-8xl">Work<span class="text-accent" aria-hidden="true">.</span></h1>
