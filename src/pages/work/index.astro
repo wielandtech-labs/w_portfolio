@@ -5,6 +5,13 @@ import { getWork } from '../../lib/work';
 import { breadcrumbs, graph } from '../../lib/schema';
 
 const work = await getWork();
+
+// Headline numbers from the resume on raphaelwieland.com; keep them in sync.
+const earlier = [
+  { value: '417x', label: 'more traffic after moving legacy customers onto cloud microservices' },
+  { value: '96%', label: 'cut in SQL query times' },
+  { value: '$6M', label: 'ARR no longer at risk after fixing config bugs in a legacy C++ codebase' },
+];
 const jsonLd = graph(
   breadcrumbs([
     { name: 'Home', path: '/' },
@@ -32,5 +39,30 @@ const jsonLd = graph(
     <ol class="mt-12">
       {work.map((entry, i) => <WorkRow entry={entry} index={i} headingLevel="h2" />)}
     </ol>
+
+    <section aria-labelledby="earlier-heading" class="mt-24">
+      <header class="border-t-[3px] border-fg pt-3">
+        <p class="label">Before this</p>
+        <h2 id="earlier-heading" class="mt-2 text-2xl leading-tight font-extrabold">Employer work at Zonar Systems</h2>
+      </header>
+      <dl class="mt-6 grid gap-[3px] border-[3px] border-fg bg-fg sm:grid-cols-3">
+        {
+          earlier.map((e) => (
+            <div class="flex flex-col-reverse justify-end gap-2 bg-bg p-5">
+              <dt class="text-[0.95rem] leading-snug text-muted">{e.label}</dt>
+              <dd class="display text-5xl tabular-nums">{e.value}</dd>
+            </div>
+          ))
+        }
+      </dl>
+      <p class="mt-6">
+        <a
+          href="https://raphaelwieland.com/#resume"
+          class="text-sm font-extrabold tracking-wide uppercase underline decoration-accent decoration-[3px] underline-offset-4"
+        >
+          Full resume &rarr;
+        </a>
+      </p>
+    </section>
   </div>
 </Base>
