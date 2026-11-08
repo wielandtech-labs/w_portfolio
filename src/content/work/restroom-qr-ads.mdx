@@ -11,8 +11,8 @@ links:
 cover: ../../assets/covers/restroom-qr-ads.svg
 coverAlt: A QR code next to bars showing each venue's share of revenue.
 metric:
-  value: '0'
-  label: raw IPs stored
+  value: '10'
+  label: ratings before a venue ranks
 order: 5
 ---
 
@@ -50,7 +50,7 @@ people scanning.
 ## Hard parts
 
 - **A leaderboard that never shames.** The "cleanest restroom" ranking lists only venues that
-  opted in and have enough ratings, ranked by a Bayesian average. The network-wide mean includes
+  opted in and have at least 10 ratings, ranked by a Bayesian average. The network-wide mean includes
   unlisted venues, so opting in can't shift the bar.
 - **Legal text that can't silently drift.** Venue agreements and advertiser terms are versioned
   files pinned by hash. Changing the text means a new version, not an edit.
