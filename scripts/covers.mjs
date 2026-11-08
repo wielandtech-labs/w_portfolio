@@ -87,21 +87,6 @@ function split() {
   return s;
 }
 
-function domains() {
-  const box = (x, y, label, hi) =>
-    `<rect x="${x}" y="${y}" width="420" height="96" fill="#0b0f14" stroke="${hi ? A : A2}" stroke-width="3"/>` +
-    `<text x="${x + 32}" y="${y + 60}" font-family="'JetBrains Mono', Consolas, monospace" font-size="30" fill="${FG}">${label}</text>`;
-  let s = box(1060, 110, 'wielandtech.com', true) + box(1060, 330, 'raphaelwieland.com', false);
-  s += `<rect x="720" y="210" width="220" height="160" fill="#0b0f14" stroke="${A}" stroke-width="3"/>`;
-  s += `<text x="830" y="282" text-anchor="middle" font-family="'JetBrains Mono', Consolas, monospace" font-size="28" fill="${A}">django</text>`;
-  s += `<text x="830" y="322" text-anchor="middle" font-family="'JetBrains Mono', Consolas, monospace" font-size="22" fill="${MU}">1 image</text>`;
-  s += `<path d="M940 270 C1000 270 1000 158 1060 158" fill="none" stroke="${A}" stroke-width="3"/>`;
-  s += `<path d="M940 310 C1000 310 1000 378 1060 378" fill="none" stroke="${A2}" stroke-width="3"/>`;
-  s += `<rect x="1060" y="520" width="440" height="64" fill="${A}" fill-opacity="0.12" stroke="${A}" stroke-opacity="0.5"/>`;
-  s += `<text x="1092" y="562" font-family="'JetBrains Mono', Consolas, monospace" font-size="21" fill="${A}">CI: build → review app → prod</text>`;
-  return s;
-}
-
 function cameras() {
   // Own PRNG, so adding this cover doesn't shift the shared sequence above.
   let s2 = 42;
@@ -122,11 +107,10 @@ function cameras() {
 }
 
 const covers = {
-  'warn-index': frame('WARN Index', 'LAYOFF NOTICES · 48 JURISDICTIONS', bars()),
+  'warn-index': frame('WARN Index', 'SELF-HEALING SCRAPERS · 48 JURISDICTIONS', bars()),
   r12d: frame('r12d', 'QR STICKERS · SHORT LINKS · INVENTORY', qr(900, 110, 25, 22, 0.5)),
   homelab: frame('K3s homelab', 'GITOPS · REVIEW APPS · OBSERVABILITY', cluster()),
   'restroom-qr-ads': frame('Restroom QR ads', 'VENUE AD NETWORK · TRAFFIC-SPLIT REVENUE', split()),
-  'w-tech': frame('One app, two domains', 'DJANGO · CI-GATED DEPLOYS', domains()),
   // Site-wide Open Graph image (not a case study).
   default: frame('WielandTech', 'BUILT AND RUN BY RAPHAEL WIELAND', bars()),
   'flock-camera-map': frame('Flock camera map', 'LICENSE PLATE READERS · 336K DEVICES', cameras()),

@@ -11,9 +11,9 @@ links:
 cover: ../../assets/covers/homelab.svg
 coverAlt: Diagram of connected cluster nodes.
 metric:
-  value: '100+'
-  label: review-app deploys
-order: 4
+  value: '1,300'
+  label: merged pull requests
+order: 2
 ---
 
 import Flow from '../../components/Flow.astro';
@@ -51,6 +51,10 @@ cluster by hand.
   databases and roles from a manifest, with nightly volume snapshots and a 14-day retention.
 - **CI inside the cluster.** Ephemeral GitHub Actions runners and a shared remote BuildKit, so
   there's no Docker daemon anywhere, including on the dev machine.
+- **Safe for coding agents.** Agents do much of the day-to-day work here, so their access is scoped.
+  A read-only MCP server gives them pods, logs, events, Flux status and PromQL through a
+  tailnet identity that RBAC limits to get/list/watch, with no Secrets. Anything that changes
+  the cluster still has to be a pull request.
 - **Observability.** Prometheus, Grafana, Loki (14 days of logs for every pod), Alertmanager
   pushing to phones, and an external dead-man's switch that reports when the whole lab is down.
 
@@ -61,6 +65,9 @@ cluster by hand.
   version silently stops applying.
 - **Automated dependency updates without footguns.** Renovate automerges only patch-level image
   updates and minor chart updates, and only after CI is green. Everything else waits for review.
+- **Hostnames live in the apps.** `ALLOWED_HOSTS`, CSRF origins and CSP host lists are app
+  code, so adding a domain means the app change deploys *before* the ingress change, or the
+  new host returns 400 until it does.
 - **Public ingress from home.** A small cloud front end passes TLS through to the cluster over a
   tunnel, with PROXY protocol so apps still see real client IPs.
 
@@ -68,7 +75,7 @@ cluster by hand.
 
 The strip on the [home page](/) is live data from this cluster. As of this writing it runs
 **4 nodes (three bare-metal, one GPU), ~85 deployments and ~150 pods**, at 99.9%+ availability
-over 30 days. It hosts 12 apps wired for review apps, and has
-handled **100+ review-app deployments** through pull requests.
+over 30 days. It hosts 12 apps wired for review apps. The platform repo has
+**1,300 merged pull requests**, about 150 of them review-app deploys. Every cluster change goes through Git.
 
 It is also more expensive and less reliable than the cloud.

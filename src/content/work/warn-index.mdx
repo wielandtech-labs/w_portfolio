@@ -1,7 +1,7 @@
 ---
 title: WARN Index
 slug: warn-index
-tagline: US layoff notices from 47 states and DC in one searchable place. Scraped daily, enriched by an LLM, mapped and charted.
+tagline: US layoff notices from 47 states and DC in one searchable place. When a state's site changes and a scraper breaks, an agent reproduces it and opens the fix as a pull request.
 year: '2026'
 status: live
 role: 'Sole developer: design, build, ops'
@@ -11,8 +11,8 @@ links:
 cover: ../../assets/covers/warn-index.svg
 coverAlt: Bar chart of weekly layoff notices with one highlighted spike.
 metric:
-  value: '48'
-  label: jurisdictions, daily
+  value: '34'
+  label: scraper breaks fixed by reviewed PR
 order: 1
 ---
 
@@ -76,6 +76,8 @@ fix.**
   public data, and each is documented.
 - **Enrichment every 6 hours**, with re-runs for low-confidence rows.
 - **About 225 BLS series** refreshed weekly as economic context.
-- A breakage costs **one reviewed PR**, not a rewrite.
+- A breakage costs **one reviewed PR**, not a rewrite. **34** of those repairs have merged so far,
+  including several states that had been going stale silently for months before the coverage
+  check caught them.
 - Runs in production on the [homelab](/work/homelab/): Kubernetes CronJobs, CloudNativePG, and
   Grafana and Alertmanager watching scraper health.
