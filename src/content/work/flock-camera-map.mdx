@@ -1,6 +1,6 @@
 ---
-title: Fluck
-slug: fluck
+title: Flock camera map
+slug: flock-camera-map
 tagline: A map of 336,000 Flock Safety surveillance devices and license plate readers that doesn't track the people looking at it.
 year: '2026'
 status: live
@@ -8,7 +8,7 @@ role: 'Sole developer: data, build, ops'
 stack: [MapLibre, PMTiles, tippecanoe, nginx, OpenStreetMap, Kubernetes, Flux]
 links:
   live: https://fluck.r12d.ch
-cover: ../../assets/covers/fluck.svg
+cover: ../../assets/covers/flock-camera-map.svg
 coverAlt: Clusters of camera dots on a dark map, three with orange view cones.
 metric:
   value: '0'
@@ -62,13 +62,13 @@ A static site where every byte comes from one origin, built from data that never
   URL beside the main bundle. Serving it same-origin with `worker-src 'self' blob:` kept the
   policy strict without `unsafe-eval` or inline scripts.
 - **Not a commercial product.** Flock's legal pressure on similar maps has used trademark
-  dilution claims, which a noncommercial site can defend against. Fluck runs on
+  dilution claims, which a noncommercial site can defend against. The map runs on
   [r12d](/work/r12d/), which went free and noncommercial for good alongside this launch.
 
 ## Outcome
 
-- Live at **fluck.r12d.ch** with 335,689 inventory devices (214,062 in service) and about
+- Live, with 335,689 inventory devices (214,062 in service) and about
   117,000 OpenStreetMap reports, refreshed every night.
-- No cookies, no analytics, no access logs, and no third-party requests, verified by the CSP
-  rather than promised.
+- No cookies, no analytics, no access logs, and no third-party requests. If I slipped and
+  added one, the CSP would block it.
 - Ships through the same GitOps pipeline as the rest of the [homelab](/work/homelab/).

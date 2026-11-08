@@ -125,11 +125,11 @@ const covers = {
   'warn-index': frame('WARN Index', 'LAYOFF NOTICES · 48 JURISDICTIONS', bars()),
   r12d: frame('r12d', 'QR STICKERS · SHORT LINKS · INVENTORY', qr(900, 110, 25, 22, 0.5)),
   homelab: frame('K3s homelab', 'GITOPS · REVIEW APPS · OBSERVABILITY', cluster()),
-  'piss-poor-idea': frame('Piss Poor Idea', 'RESTROOM QR AD NETWORK', split()),
+  'restroom-qr-ads': frame('Restroom QR ads', 'VENUE AD NETWORK · TRAFFIC-SPLIT REVENUE', split()),
   'w-tech': frame('One app, two domains', 'DJANGO · CI-GATED DEPLOYS', domains()),
   // Site-wide Open Graph image (not a case study).
-  default: frame('WielandTech', 'PRODUCTION SYSTEMS, END TO END', bars()),
-  fluck: frame('Fluck', 'FLOCK CAMERA MAP · 336K DEVICES', cameras()),
+  default: frame('WielandTech', 'BUILT AND RUN BY RAPHAEL WIELAND', bars()),
+  'flock-camera-map': frame('Flock camera map', 'LICENSE PLATE READERS · 336K DEVICES', cameras()),
 };
 
 for (const [name, svg] of Object.entries(covers)) writeFileSync(join(out, `${name}.svg`), svg);

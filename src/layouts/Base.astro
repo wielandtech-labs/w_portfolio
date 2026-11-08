@@ -17,7 +17,7 @@ interface Props {
 const { title, description, ogImage = '/og/default.png', ogType = 'website', jsonLd } = Astro.props;
 // Escape '<' so content can never close the script element.
 const jsonLdText = jsonLd ? JSON.stringify(jsonLd).replace(/</g, '\\u003c') : undefined;
-const fullTitle = title ? `${title} | WielandTech` : 'WielandTech: production systems, end to end';
+const fullTitle = title ? `${title} | WielandTech` : 'WielandTech: Raphael Wieland builds software and keeps it running';
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const ogUrl = new URL(ogImage, Astro.site);
 const path = Astro.url.pathname;

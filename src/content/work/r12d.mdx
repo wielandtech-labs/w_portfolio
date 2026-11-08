@@ -39,7 +39,7 @@ One Django service with two faces, picked by the request's host:
   ]}
 />
 
-- **No visitor tracking, by construction.** No IP address, user agent or per-scan row is ever
+- **No visitor tracking.** No IP address, user agent or per-scan row is ever
   stored. Scans become anonymous daily counts. The public host sets no cookies for anonymous
   visitors, and the app server runs without an access log. A dedicated test suite guards
   everything the app can enforce.
@@ -62,6 +62,6 @@ One Django service with two faces, picked by the request's host:
 ## Outcome
 
 - Live at **r12d.ch**, with the product on its own host.
-- Privacy is a set of tested rules, not a promise on a marketing page.
+- The privacy rules are tests, so breaking one fails CI.
 - Ships through the same review-app → dev → prod pipeline as everything else on the
   [homelab](/work/homelab/).

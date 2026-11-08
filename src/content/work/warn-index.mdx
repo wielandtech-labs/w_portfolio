@@ -49,7 +49,7 @@ fix.**
 - **The fetch/parse split.** Each state module fetches raw bytes and parses them separately. When
   parsing or validation fails, the runner saves the exact response as a snapshot, so the
   breakage can be reproduced offline, byte for byte.
-- **Repair is a reviewed PR, not magic.** A Claude Code operation reproduces the break live,
+- **Repair is a reviewed PR.** A Claude Code operation reproduces the break live,
   fixes `parse()` until it handles the new page *and* still passes the golden fixture, runs the
   tests, and opens a pull request. A human merges it, because merging is a production deploy.
 - **Enrichment with confidence scores.** An LLM agent with web search fills in company details
