@@ -12,7 +12,7 @@ export const services: Service[] = [
     id: 'platforms',
     title: 'Kubernetes & GitOps platforms',
     summary:
-      'A deploy pipeline your team trusts: every change through Git, a preview environment per pull request, and gates that catch mistakes before production does.',
+      'Every change goes through Git, every pull request gets its own copy of the app, and the pipeline catches mistakes before production does. It is the setup I run at home for 12 apps.',
     deliverables: [
       'K3s or managed Kubernetes with Flux GitOps',
       'Review apps per pull request, dev/QA/prod promotion',
@@ -26,7 +26,7 @@ export const services: Service[] = [
     id: 'web',
     title: 'Django & Python web apps',
     summary:
-      'Production web apps with tests, migrations that are checked in CI, and privacy and multi-tenancy designed in from the start, not bolted on.',
+      'Django apps with real tests, migrations checked in CI, and privacy and multi-tenancy designed in from the first model.',
     deliverables: [
       'Django apps from MVP to multi-tenant SaaS',
       'Auth, billing hooks, admin back office',
@@ -40,7 +40,7 @@ export const services: Service[] = [
     id: 'data',
     title: 'Data pipelines & scraping',
     summary:
-      'Collectors that keep working when sources change: scheduled jobs, validation gates, replayable failures and clean data in Postgres or your warehouse.',
+      'Scrapers that assume the source will change. Scheduled jobs, validation, a saved snapshot of every failure, and clean data in Postgres or your warehouse.',
     deliverables: [
       'Scrapers for HTML, PDF, CSV and hostile sites',
       'Validation, de-duplication and failure snapshots',
@@ -54,10 +54,10 @@ export const services: Service[] = [
     id: 'ai',
     title: 'AI & LLM integration',
     summary:
-      'LLM features that earn their place: enrichment and extraction with confidence scores, agent workflows with a human review step, and costs you can predict.',
+      'LLMs where they actually help: enrichment and extraction with a confidence score on every answer, agents that hand a human a pull request to review, and costs you can predict.',
     deliverables: [
       'LLM enrichment and extraction pipelines',
-      'Agent workflows that open PRs, not surprises',
+      'Agent workflows that end in a reviewed PR',
       'Evaluation against real data before rollout',
       'Rate limits, retries and cost controls',
     ],
