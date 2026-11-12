@@ -1,0 +1,85 @@
+---
+// Inline SVG on purpose: the site CSP blocks <style>/style="", and token classes
+// (fill-bg, stroke-fg, fill-accent…) follow the theme toggle. Public-safe labels only.
+---
+
+<svg viewBox="0 0 720 500" class="block h-auto w-full" role="img" aria-labelledby="arch-cicd-title arch-cicd-desc" xmlns="http://www.w3.org/2000/svg">
+  <title id="arch-cicd-title">CI/CD and environments</title>
+  <desc id="arch-cicd-desc">App repositories build on in-cluster runners and push images with three tag families. Pull-request tags become review apps through a validated, auto-merged PR; dev tags flow to dev through Flux image automation; QA is pinned by a promotion workflow; production tags fast-forward the platform repo and a post-merge job waits for Flux to apply that exact commit before checking health.</desc>
+  <defs>
+    <marker id="arch-cicd-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" class="fill-fg" />
+    </marker>
+    <marker id="arch-cicd-ah-acc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" class="fill-accent" />
+    </marker>
+  </defs>
+  <text x="10" y="22" class="font-sans fill-fg" font-size="12" font-weight="700">Event</text>
+  <text x="135" y="22" class="font-sans fill-fg" font-size="12" font-weight="700">Build → GHCR</text>
+  <text x="275" y="22" class="font-sans fill-fg" font-size="12" font-weight="700">Platform repo automation</text>
+  <text x="545" y="22" class="font-sans fill-fg" font-size="12" font-weight="700">Environment</text>
+  <rect x="135" y="34" width="125" height="350" class="fill-surface stroke-fg" stroke-width="2" />
+  <text x="145" y="52" class="font-mono fill-muted" font-size="10">runners +</text>
+  <text x="145" y="64" class="font-mono fill-muted" font-size="10">BuildKit</text>
+  <rect x="10" y="80" width="110" height="62" class="fill-bg stroke-fg" stroke-width="1.5" />
+  <text x="20" y="100" class="font-sans fill-fg" font-size="13" font-weight="700">Pull request</text>
+  <rect x="145" y="92" width="105" height="38" class="fill-bg stroke-fg" stroke-width="1.5" />
+  <text x="153" y="116" class="font-mono fill-fg" font-size="11" font-weight="700">pr-&lt;n&gt;</text>
+  <rect x="275" y="80" width="255" height="62" class="fill-bg stroke-fg" stroke-width="2" />
+  <text x="285" y="100" class="font-sans fill-fg" font-size="12" font-weight="700">Review-app PR generated</text>
+  <rect x="285" y="110" width="235" height="22" class="fill-bg stroke-fg" stroke-width="1.5" stroke-dasharray="5 4" />
+  <text x="293" y="125" class="font-mono fill-fg" font-size="10">gate: render + schema + policy ✓</text>
+  <rect x="545" y="80" width="165" height="62" class="fill-bg stroke-fg" stroke-width="1.5" />
+  <text x="555" y="100" class="font-sans fill-fg" font-size="13" font-weight="700">Review app</text>
+  <text x="555" y="118" class="font-mono fill-muted" font-size="11">per-PR namespace + URL</text>
+  <path d="M120,111 L141,111" fill="none" class="stroke-fg" stroke-width="1.75" marker-end="url(#arch-cicd-ah)" />
+  <path d="M250,111 L271,111" fill="none" class="stroke-fg" stroke-width="1.75" marker-end="url(#arch-cicd-ah)" />
+  <path d="M530,111 L541,111" fill="none" class="stroke-fg" stroke-width="1.75" marker-end="url(#arch-cicd-ah)" />
+  <rect x="10" y="156" width="110" height="62" class="fill-bg stroke-fg" stroke-width="1.5" />
+  <text x="20" y="176" class="font-sans fill-fg" font-size="13" font-weight="700">Branch push</text>
+  <rect x="145" y="168" width="105" height="38" class="fill-bg stroke-fg" stroke-width="1.5" />
+  <text x="153" y="192" class="font-mono fill-fg" font-size="11" font-weight="700">dev-&lt;ts&gt;</text>
+  <rect x="275" y="156" width="255" height="62" class="fill-bg stroke-fg" stroke-width="2" />
+  <text x="285" y="176" class="font-sans fill-fg" font-size="12" font-weight="700">Flux image automation</text>
+  <rect x="285" y="186" width="235" height="22" class="fill-bg stroke-fg" stroke-width="1.5" stroke-dasharray="5 4" />
+  <text x="293" y="201" class="font-mono fill-fg" font-size="10">gate: render check → fast-forward</text>
+  <rect x="545" y="156" width="165" height="62" class="fill-bg stroke-fg" stroke-width="1.5" />
+  <text x="555" y="176" class="font-sans fill-fg" font-size="13" font-weight="700">Dev</text>
+  <text x="555" y="194" class="font-mono fill-muted" font-size="11">tracks newest dev tag</text>
+  <path d="M120,187 L141,187" fill="none" class="stroke-fg" stroke-width="1.75" marker-end="url(#arch-cicd-ah)" />
+  <path d="M250,187 L271,187" fill="none" class="stroke-fg" stroke-width="1.75" marker-end="url(#arch-cicd-ah)" />
+  <path d="M530,187 L541,187" fill="none" class="stroke-fg" stroke-width="1.75" marker-end="url(#arch-cicd-ah)" />
+  <rect x="10" y="232" width="110" height="62" class="fill-bg stroke-fg" stroke-width="1.5" />
+  <text x="20" y="252" class="font-sans fill-fg" font-size="13" font-weight="700">Promote</text>
+  <rect x="145" y="244" width="105" height="38" class="fill-bg stroke-fg" stroke-width="1.5" />
+  <text x="153" y="268" class="font-mono fill-fg" font-size="11" font-weight="700">reuses dev</text>
+  <rect x="275" y="232" width="255" height="62" class="fill-bg stroke-fg" stroke-width="2" />
+  <text x="285" y="252" class="font-sans fill-fg" font-size="12" font-weight="700">Promotion workflow pins tag</text>
+  <rect x="285" y="262" width="235" height="22" class="fill-bg stroke-fg" stroke-width="1.5" stroke-dasharray="5 4" />
+  <text x="293" y="277" class="font-mono fill-fg" font-size="10">gate: render + schema + policy ✓</text>
+  <rect x="545" y="232" width="165" height="62" class="fill-bg stroke-fg" stroke-width="1.5" />
+  <text x="555" y="252" class="font-sans fill-fg" font-size="13" font-weight="700">QA (opt-in)</text>
+  <text x="555" y="270" class="font-mono fill-muted" font-size="11">pinned tag</text>
+  <path d="M120,263 L141,263" fill="none" class="stroke-fg" stroke-width="1.75" marker-end="url(#arch-cicd-ah)" />
+  <path d="M250,263 L271,263" fill="none" class="stroke-fg" stroke-width="1.75" marker-end="url(#arch-cicd-ah)" />
+  <path d="M530,263 L541,263" fill="none" class="stroke-fg" stroke-width="1.75" marker-end="url(#arch-cicd-ah)" />
+  <rect x="10" y="308" width="110" height="62" class="fill-accent stroke-fg" stroke-width="2" />
+  <text x="20" y="328" class="font-sans fill-accent-fg" font-size="13" font-weight="700">Merge to main</text>
+  <rect x="145" y="320" width="105" height="38" class="fill-accent stroke-fg" stroke-width="2" />
+  <text x="153" y="344" class="font-mono fill-accent-fg" font-size="11" font-weight="700">&lt;ts&gt; (prod)</text>
+  <rect x="275" y="308" width="255" height="62" class="fill-accent stroke-fg" stroke-width="2" />
+  <text x="285" y="328" class="font-sans fill-accent-fg" font-size="12" font-weight="700">Flux image automation</text>
+  <rect x="285" y="338" width="235" height="22" class="fill-bg stroke-fg" stroke-width="1.5" stroke-dasharray="5 4" />
+  <text x="293" y="353" class="font-mono fill-fg" font-size="10">gate: render check → fast-forward</text>
+  <rect x="545" y="308" width="165" height="62" class="fill-accent stroke-fg" stroke-width="2" />
+  <text x="555" y="328" class="font-sans fill-accent-fg" font-size="13" font-weight="700">Prod</text>
+  <text x="555" y="346" class="font-mono fill-accent-fg" font-size="11">public via the edge</text>
+  <path d="M120,339 L141,339" fill="none" class="stroke-accent" stroke-width="3" marker-end="url(#arch-cicd-ah-acc)" />
+  <path d="M250,339 L271,339" fill="none" class="stroke-accent" stroke-width="3" marker-end="url(#arch-cicd-ah-acc)" />
+  <path d="M530,339 L541,339" fill="none" class="stroke-accent" stroke-width="3" marker-end="url(#arch-cicd-ah-acc)" />
+  <!-- post-merge verification -->
+  <path d="M627,370 L627,396" fill="none" class="stroke-accent" stroke-width="3" marker-end="url(#arch-cicd-ah-acc)" />
+  <rect x="10" y="400" width="700" height="88" class="fill-bg stroke-fg" stroke-width="2" />
+  <text x="20" y="420" class="font-sans fill-fg" font-size="13" font-weight="700">Post-merge verification (every push to the platform repo)</text>
+  <text x="20" y="440" class="font-mono fill-muted" font-size="11"><tspan x="20" dy="0">1. Revision gate: wait until Flux has applied this commit (or a newer one).</tspan><tspan x="20" dy="15">2. Then check pods, endpoints and events against a risk-based deadline.</tspan><tspan x="20" dy="15">3. Fail the run unless the verdict is healthy.</tspan></text>
+</svg>

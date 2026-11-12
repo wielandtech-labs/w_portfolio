@@ -1,0 +1,102 @@
+---
+// Inline SVG on purpose: the site CSP blocks <style>/style="", and token classes
+// (fill-bg, stroke-fg, fill-accent…) follow the theme toggle. Public-safe labels only.
+---
+
+<svg viewBox="0 0 720 560" class="block h-auto w-full" role="img" aria-labelledby="arch-net-title arch-net-desc" xmlns="http://www.w3.org/2000/svg">
+  <title id="arch-net-title">Homelab network topology</title>
+  <desc id="arch-net-desc">Public traffic reaches a cloud VPS, crosses an encrypted WireGuard tunnel to a UniFi gateway with dual WAN, and is allowed only to the ingress load-balancer address inside a default-deny cluster zone. Trusted LAN, IoT, work, guest and remote-VPN zones sit beside it. A GPU worker on the trusted LAN joins the cluster through narrow pinholes, and Tailscale is the admin path.</desc>
+  <defs>
+    <marker id="arch-net-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" class="fill-fg" />
+    </marker>
+    <marker id="arch-net-ah-acc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" class="fill-accent" />
+    </marker>
+  </defs>
+  <!-- edge row -->
+  <rect x="10" y="10" width="110" height="64" class="fill-bg stroke-fg" stroke-width="2" />
+  <text x="20" y="30" class="font-sans fill-fg" font-size="13" font-weight="700">Internet</text>
+  <text x="20" y="48" class="font-mono fill-muted" font-size="11"><tspan x="20" dy="0">public DNS →</tspan><tspan x="20" dy="15">cloud edge</tspan></text>
+  <rect x="170" y="10" width="190" height="64" class="fill-surface stroke-fg" stroke-width="2" />
+  <text x="180" y="30" class="font-sans fill-fg" font-size="13" font-weight="700">Cloud edge (VPS)</text>
+  <text x="180" y="48" class="font-mono fill-muted" font-size="11"><tspan x="180" dy="0">TLS passthrough,</tspan><tspan x="180" dy="15">PROXY header added</tspan></text>
+  <rect x="450" y="10" width="260" height="64" class="fill-bg stroke-fg" stroke-width="2" />
+  <text x="460" y="30" class="font-sans fill-fg" font-size="13" font-weight="700">Gateway (UniFi ZBF)</text>
+  <text x="460" y="48" class="font-mono fill-muted" font-size="11"><tspan x="460" dy="0">zone-based firewall + IPS</tspan><tspan x="460" dy="15">dual WAN: fiber + LTE</tspan></text>
+  <path d="M120,42 L166,42" fill="none" class="stroke-accent" stroke-width="3" marker-end="url(#arch-net-ah-acc)" />
+  <path d="M360,42 L446,42" fill="none" class="stroke-accent" stroke-width="3" marker-end="url(#arch-net-ah-acc)" />
+  <text x="366" y="34" class="font-sans fill-accent-text" font-size="11" font-weight="700">WireGuard</text>
+  <text x="366" y="60" class="font-mono fill-muted" font-size="10">encrypted</text>
+  <!-- left column zones -->
+  <rect x="10" y="110" width="210" height="164" class="fill-surface stroke-fg" stroke-width="2" />
+  <text x="20" y="130" class="font-sans fill-fg" font-size="13" font-weight="700">Trusted LAN</text>
+  <rect x="20" y="142" width="190" height="48" class="fill-bg stroke-fg" stroke-width="1.5" />
+  <text x="30" y="162" class="font-sans fill-fg" font-size="13" font-weight="700">Workstations</text>
+  <text x="30" y="180" class="font-mono fill-muted" font-size="11">reach LAN apps</text>
+  <rect x="20" y="200" width="190" height="62" class="fill-bg stroke-fg" stroke-width="1.5" />
+  <text x="30" y="220" class="font-sans fill-fg" font-size="13" font-weight="700">GPU worker (WSL2)</text>
+  <text x="30" y="238" class="font-mono fill-muted" font-size="11"><tspan x="30" dy="0">joins the cluster</tspan><tspan x="30" dy="15">from the trusted LAN</tspan></text>
+  <rect x="10" y="286" width="210" height="48" class="fill-surface stroke-fg" stroke-width="2" />
+  <text x="20" y="306" class="font-sans fill-fg" font-size="13" font-weight="700">IoT zone</text>
+  <text x="20" y="323" class="font-mono fill-muted" font-size="11">isolated, replies only</text>
+  <rect x="10" y="344" width="210" height="48" class="fill-surface stroke-fg" stroke-width="2" />
+  <text x="20" y="364" class="font-sans fill-fg" font-size="13" font-weight="700">Work zone</text>
+  <text x="20" y="381" class="font-mono fill-muted" font-size="11">internet only</text>
+  <rect x="10" y="402" width="210" height="48" class="fill-surface stroke-fg" stroke-width="2" />
+  <text x="20" y="422" class="font-sans fill-fg" font-size="13" font-weight="700">Guest zone</text>
+  <text x="20" y="439" class="font-mono fill-muted" font-size="11">client isolation</text>
+  <rect x="10" y="460" width="210" height="48" class="fill-surface stroke-fg" stroke-width="2" />
+  <text x="20" y="480" class="font-sans fill-fg" font-size="13" font-weight="700">Remote VPN</text>
+  <text x="20" y="497" class="font-mono fill-muted" font-size="11">→ cluster zone</text>
+  <!-- cluster zone -->
+  <rect x="280" y="110" width="430" height="396" class="fill-surface stroke-fg" stroke-width="2" />
+  <text x="292" y="130" class="font-sans fill-fg" font-size="13" font-weight="700">Cluster zone (default-deny)</text>
+  <rect x="292" y="142" width="406" height="96" class="fill-bg stroke-fg" stroke-width="2" />
+  <text x="302" y="160" class="font-sans fill-fg" font-size="12" font-weight="700">Load-balancer IPs (MetalLB)</text>
+  <rect x="302" y="170" width="72" height="56" class="fill-accent stroke-fg" stroke-width="2" />
+  <text x="310" y="190" class="font-sans fill-accent-fg" font-size="12" font-weight="700">Ingress</text>
+  <text x="310" y="208" class="font-mono fill-accent-fg" font-size="10">Traefik</text>
+  <rect x="380" y="170" width="72" height="56" class="fill-bg stroke-fg" stroke-width="1.5" />
+  <text x="388" y="190" class="font-sans fill-fg" font-size="12" font-weight="700">Media</text>
+  <text x="388" y="208" class="font-mono fill-muted" font-size="10">Plex</text>
+  <rect x="458" y="170" width="72" height="56" class="fill-bg stroke-fg" stroke-width="1.5" />
+  <text x="466" y="190" class="font-sans fill-fg" font-size="12" font-weight="700">Home</text>
+  <text x="466" y="208" class="font-mono fill-muted" font-size="10">HA</text>
+  <rect x="536" y="170" width="72" height="56" class="fill-bg stroke-fg" stroke-width="1.5" />
+  <text x="544" y="190" class="font-sans fill-fg" font-size="12" font-weight="700">Database</text>
+  <text x="544" y="208" class="font-mono fill-muted" font-size="10">Postgres</text>
+  <rect x="614" y="170" width="72" height="56" class="fill-bg stroke-fg" stroke-width="1.5" />
+  <text x="622" y="190" class="font-sans fill-fg" font-size="12" font-weight="700">Game</text>
+  <text x="622" y="208" class="font-mono fill-muted" font-size="10">Minecraft</text>
+  <rect x="292" y="250" width="406" height="76" class="fill-bg stroke-fg" stroke-width="2" />
+  <text x="302" y="268" class="font-sans fill-fg" font-size="12" font-weight="700">K3s nodes</text>
+  <rect x="302" y="278" width="190" height="38" class="fill-bg stroke-fg" stroke-width="1.5" />
+  <text x="312" y="298" class="font-sans fill-fg" font-size="13" font-weight="700">Control-plane node</text>
+  <rect x="498" y="278" width="190" height="38" class="fill-bg stroke-fg" stroke-width="1.5" />
+  <text x="508" y="298" class="font-sans fill-fg" font-size="13" font-weight="700">Worker ×2</text>
+  <rect x="292" y="338" width="406" height="52" class="fill-bg stroke-fg" stroke-width="2" />
+  <text x="302" y="358" class="font-sans fill-fg" font-size="13" font-weight="700">Tailscale operator</text>
+  <text x="302" y="376" class="font-mono fill-muted" font-size="11">admin path; read-only API proxy for agents</text>
+  <rect x="292" y="402" width="290" height="92" class="fill-bg stroke-fg" stroke-width="2" />
+  <text x="302" y="422" class="font-sans fill-fg" font-size="13" font-weight="700">NAS (block + file + S3)</text>
+  <text x="302" y="440" class="font-mono fill-muted" font-size="11"><tspan x="302" dy="0">iSCSI volumes, NFS shares,</tspan><tspan x="302" dy="15">object storage for</tspan><tspan x="302" dy="15">Postgres backups</tspan></text>
+  <rect x="592" y="402" width="106" height="92" class="fill-bg stroke-fg" stroke-width="2" />
+  <text x="602" y="422" class="font-sans fill-fg" font-size="13" font-weight="700">UPS</text>
+  <text x="602" y="440" class="font-mono fill-muted" font-size="11"><tspan x="602" dy="0">battery for</tspan><tspan x="602" dy="15">nodes + NAS</tspan></text>
+  <!-- flows -->
+  <path d="M580,74 L580,96 L270,96 L270,198 L298,198" fill="none" class="stroke-accent" stroke-width="3" marker-end="url(#arch-net-ah-acc)" />
+  <text x="590" y="92" class="font-sans fill-accent-text" font-size="11" font-weight="700">tunnel → ingress only</text>
+  <path d="M210,166 L246,166 L246,186 L298,186" fill="none" class="stroke-fg" stroke-width="1.75" marker-end="url(#arch-net-ah)" />
+  <text x="228" y="160" class="font-mono fill-muted" font-size="10">LAN</text>
+  <path d="M210,240 L254,240 L254,297 L298,297" fill="none" class="stroke-fg" stroke-width="1.75" marker-end="url(#arch-net-ah)" marker-start="url(#arch-net-ah)" />
+  <text x="222" y="258" class="font-mono fill-muted" font-size="10">pinholes</text>
+  <path d="M280,320 L230,320 L230,310 L224,310" fill="none" class="stroke-fg" stroke-width="1.75" marker-end="url(#arch-net-ah)" />
+  <text x="228" y="334" class="font-mono fill-muted" font-size="10">automation</text>
+  <path d="M220,483 L276,483" fill="none" class="stroke-fg" stroke-width="1.75" marker-end="url(#arch-net-ah)" />
+  <!-- legend -->
+  <path d="M10,530 L44,530" fill="none" class="stroke-accent" stroke-width="3" />
+  <text x="52" y="534" class="font-sans fill-fg" font-size="11">public HTTPS path</text>
+  <path d="M190,530 L224,530" fill="none" class="stroke-fg" stroke-width="1.75" />
+  <text x="232" y="534" class="font-sans fill-fg" font-size="11">allowed by a firewall policy; everything else is denied</text>
+</svg>
