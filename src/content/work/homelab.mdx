@@ -16,7 +16,7 @@ metric:
 order: 2
 ---
 
-import Flow from '../../components/Flow.astro';
+import Architecture from '../../components/Architecture.astro';
 
 ## Problem
 
@@ -30,15 +30,28 @@ request, and where the deploy process itself stops mistakes.
 Everything is declared in one Git repository and reconciled by Flux. Nothing is changed in the
 cluster by hand.
 
-<Flow
-  caption="The promotion ladder every app uses. Image tags drive each step; Git records every change."
-  steps={[
-    { label: 'Pull request', detail: 'pr-<n> image' },
-    { label: 'Review app', detail: 'pr-<n>-<app>.review…', highlight: true },
-    { label: 'Dev', detail: 'auto-tracks dev-* tags' },
-    { label: 'QA (opt-in)', detail: 'pinned · promote workflow' },
-    { label: 'Prod', detail: 'main merge → verified rollout' },
-  ]}
+### Architecture
+
+<Architecture
+  view="network"
+  caption="Network. Public traffic lands on a cloud edge and crosses an encrypted tunnel; the cluster zone is default-deny and only the ingress address is reachable from it."
+/>
+
+<Architecture
+  view="request"
+  caption="One public HTTPS request, from DNS to Postgres. TLS terminates in the cluster, and the real client IP survives the tunnel."
+/>
+
+<Architecture
+  view="platform"
+  caption="Platform layers, bottom up. Flux reconciles every layer from Git."
+/>
+
+### Shipping
+
+<Architecture
+  view="cicd"
+  caption="The promotion ladder every app uses. Image tags drive each step, every step has a gate, and Git records every change."
 />
 
 - **Review apps for every PR.** Opening a pull request in any app repo builds an image and
@@ -48,7 +61,8 @@ cluster by hand.
   server-side required reviewers. The gates live in the workflows instead: promotions poll the
   CI check before merging, and a post-merge job verifies that the new image actually rolled out.
 - **One shared, backed-up Postgres.** CloudNativePG runs a single cluster. Apps get isolated
-  databases and roles from a manifest, with nightly volume snapshots and a 14-day retention.
+  databases and roles from a manifest, with nightly volume snapshots kept 14 days, plus continuous WAL archiving and weekly base
+  backups to object storage for 30 days of point-in-time recovery.
 - **CI inside the cluster.** Ephemeral GitHub Actions runners and a shared remote BuildKit, so
   there's no Docker daemon anywhere, including on the dev machine.
 - **Safe for coding agents.** Agents do much of the day-to-day work here, so their access is scoped.

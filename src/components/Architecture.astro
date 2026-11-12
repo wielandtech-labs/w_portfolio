@@ -1,0 +1,37 @@
+---
+// Architecture diagram as inline SVG, in Flow.astro's visual language: heavy
+// borders, one orange accent for the request / deploy path. Inline (not <img>)
+// because the CSP's style-src 'self' would block an SVG's own <style>, and
+// token classes follow the light/dark toggle. Wide views scroll inside the
+// figure on phones; the request path is portrait and fits natively.
+import Network from './architecture/Network.astro';
+import Platform from './architecture/Platform.astro';
+import Cicd from './architecture/Cicd.astro';
+import RequestPath from './architecture/RequestPath.astro';
+
+interface Props {
+  view: 'network' | 'platform' | 'cicd' | 'request';
+  caption: string;
+  /** Optional dashed side note under the diagram, like Flow's note. */
+  note?: string;
+}
+const { view, caption, note } = Astro.props;
+const portrait = view === 'request';
+---
+
+<figure class="my-10">
+  <div
+    class:list={['border-2 border-fg bg-bg p-2 sm:p-3', portrait ? 'mx-auto max-w-sm' : 'overflow-x-auto']}
+    tabindex={portrait ? undefined : 0}
+    aria-label={portrait ? undefined : `${caption} (scrolls sideways on small screens)`}
+  >
+    <div class:list={[!portrait && 'min-w-[640px]']}>
+      {view === 'network' && <Network />}
+      {view === 'platform' && <Platform />}
+      {view === 'cicd' && <Cicd />}
+      {view === 'request' && <RequestPath />}
+    </div>
+  </div>
+  {note && <p class="mt-2 border-2 border-dashed border-fg px-3 py-2 font-mono text-xs">↺ {note}</p>}
+  <figcaption class="mt-3 font-mono text-xs text-muted">{caption}</figcaption>
+</figure>
